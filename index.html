@@ -1,111 +1,26 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Chat SLER - Protocolo de Comunicación Vertical</title>
-    <style>
-        body { font-family: monospace; background: #f4f4f4; margin: 0; display: flex; flex-direction: column; height: 100vh; align-items: center; }
-        
-        /* Contenedor principal para mantener la verticalidad */
-        #chat-wrapper { width: 350px; background: white; display: flex; flex-direction: column; height: 100%; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        
-        #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 15px; background: #fafafa; }
-        
-        .message-block { background: #fff; border: 1px solid #ddd; border-left: 5px solid #000; padding: 8px; border-radius: 4px; }
-        
-        .author-tag { font-size: 10px; font-weight: bold; color: #555; border-bottom: 1px solid #eee; margin-bottom: 5px; padding-bottom: 2px; text-transform: uppercase; }
-        
-        .content { font-size: 16px; line-height: 1.3; white-space: pre-wrap; word-wrap: break-word; color: #000; }
-        
-        /* Área de entrada optimizada para SLER */
-        .input-area { padding: 15px; border-top: 2px solid #eee; background: white; display: flex; flex-direction: column; gap: 10px; }
-        
-        textarea { 
-            width: 100%; height: 80px; padding: 10px; font-family: monospace; 
-            font-size: 16px; border: 1px solid #000; resize: none; box-sizing: border-box;
+function slerize(text) {
+    // Límite estricto de 25-30 caracteres para máxima verticalidad
+    const LIMIT = 25; 
+    let words = text.split(/\s+/);
+    let lines = [];
+    let currentLine = "";
+
+    words.forEach((word, index) => {
+        // Si la palabra cabe en la línea actual
+        if ((currentLine + " " + word).trim().length <= LIMIT) {
+            currentLine += (currentLine === "" ? "" : " ") + word;
+        } else {
+            // Aplicar guion de salida en línea M
+            lines.push(currentLine.trim() + "-");
+            // Aplicar guion de entrada en línea C (Reciprocidad)
+            currentLine = "-" + word;
         }
-        
-        button { width: 100%; padding: 10px; cursor: pointer; background: #000; color: #fff; border: none; font-family: monospace; font-weight: bold; }
-        
-        #login-overlay { position: fixed; inset: 0; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        #login-overlay input { padding: 10px; border: 1px solid #000; font-family: monospace; margin-bottom: 10px; }
-    </style>
-</head>
-<body>
-
-    <div id="login-overlay">
-        <h3>ACCESO AL PROTOCOLO CHAT SLER</h3>
-        <input type="text" id="userNick" placeholder="TU APODO / NICK">
-        <button onclick="enterChat()" style="width: 200px;">ENTRAR</button>
-    </div>
-
-    <div id="chat-wrapper">
-        <div id="chat-container">
-            </div>
-
-        <div class="input-area">
-            <textarea id="msgInput" placeholder="Escribe aquí..." onkeypress="handleKey(event)"></textarea>
-            <button onclick="sendMessage()">ENVIAR (MODO SLER)</button>
-        </div>
-    </div>
-
-<script>
-    let userNick = "";
-    const CHAR_LIMIT = 25; // Límite estrecho para forzar verticalidad
-
-    function enterChat() {
-        const nick = document.getElementById('userNick').value.trim();
-        if (nick) {
-            userNick = nick;
-            document.getElementById('login-overlay').style.display = 'none';
-            document.getElementById('msgInput').focus();
-        }
+    });
+    
+    // Agregar la última línea sin guion final
+    if (currentLine !== "") {
+        lines.push(currentLine.trim());
     }
-
-    function handleKey(e) {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
-    }
-
-    function slerize(text) {
-        let words = text.split(/\s+/);
-        let lines = [];
-        let currentLine = "";
-
-        words.forEach(word => {
-            // Lógica de reciprocidad básica M/C con guiones
-            if ((currentLine + word).length < CHAR_LIMIT) {
-                currentLine += (currentLine === "" ? "" : " ") + word;
-            } else {
-                lines.push(currentLine + "-");
-                currentLine = "-" + word;
-            }
-        });
-        lines.push(currentLine);
-        return lines.join('\n');
-    }
-
-    function sendMessage() {
-        const input = document.getElementById('msgInput');
-        const rawText = input.value.trim();
-        if (!rawText) return;
-
-        const slerText = slerize(rawText);
-        const container = document.getElementById('chat-container');
-
-        const msgDiv = document.createElement('div');
-        msgDiv.className = 'message-block';
-        msgDiv.innerHTML = `
-            <div class="author-tag">ENVIADO POR: ${userNick}</div>
-            <div class="content">${slerText}</div>
-        `;
-        
-        container.appendChild(msgDiv);
-        input.value = "";
-        container.scrollTop = container.scrollHeight;
-    }
-</script>
-</body>
-</html>
+    
+    return lines.join('\n');
+}
