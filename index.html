@@ -2,115 +2,108 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat SLER - Protocolo de Comunicación Vertical</title>
+    <title>Chat SLER - Protocolo Vertical</title>
     <style>
-        /* Estética de Laboratorio: Cero Cosmética Innecesaria */
-        body { 
-            font-family: monospace; 
-            background: #f4f4f4; 
-            margin: 0; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100vh; 
-            align-items: center; 
-        }
+        body { font-family: monospace; background: #e5e5e5; margin: 0; display: flex; justify-content: center; height: 100vh; }
         
-        /* Contenedor tipo "App Nodriza" Compacta */
-        #chat-wrapper { 
-            width: 350px; 
-            background: white; 
-            display: flex; 
-            flex-direction: column; 
-            height: 100%; 
-            box-shadow: 0 0 15px rgba(0,0,0,0.1); 
-            border-left: 1px solid #ddd;
-            border-right: 1px solid #ddd;
+        /* Contenedor principal */
+        #wrapper { 
+            width: 360px; background: white; display: flex; flex-direction: column; 
+            border: 2px solid #000; height: 100vh; position: relative;
         }
-        
-        /* Pantalla de Mensajes */
+
+        /* Zona donde aparecen los mensajes */
         #chat-container { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 15px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            background: #fafafa; 
-        }
-        
-        /* Burbuja de Mensaje SLER */
-        .message-block { 
-            background: #fff; 
-            border: 1px solid #eee; 
-            border-left: 5px solid #000; 
-            padding: 10px; 
-            border-radius: 2px;
-            animation: fadeIn 0.3s ease;
+            flex: 1; overflow-y: auto; padding: 15px; 
+            display: flex; flex-direction: column; gap: 10px; background: #fff;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Estilo de la burbuja SLER */
+        .msg { 
+            background: #f9f9f9; border-left: 5px solid #000; 
+            padding: 8px; border-bottom: 1px solid #ddd;
         }
-        
-        .author-tag { 
-            font-size: 10px; 
-            font-weight: bold; 
-            color: #777; 
-            border-bottom: 1px solid #eee; 
-            margin-bottom: 8px; 
-            padding-bottom: 3px; 
-            text-transform: uppercase; 
-            letter-spacing: 1px;
-        }
-        
-        .content { 
-            font-size: 16px; 
-            line-height: 1.4; 
-            white-space: pre-wrap; 
-            word-wrap: break-word; 
-            color: #000;
-            letter-spacing: 0.5px;
-        }
-        
-        /* Área de Entrada Optimizada */
-        .input-area { 
-            padding: 15px; 
-            border-top: 2px solid #000; 
-            background: white; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
-        }
-        
+        .nick-label { font-size: 10px; font-weight: bold; color: blue; margin-bottom: 4px; }
+        .sler-text { font-size: 16px; line-height: 1.2; white-space: pre-wrap; }
+
+        /* Zona de escritura (Abajo) */
+        .input-area { padding: 10px; background: #eee; border-top: 2px solid #000; }
         textarea { 
-            width: 100%; 
-            height: 100px; 
-            padding: 10px; 
-            font-family: monospace; 
-            font-size: 16px; 
-            border: 1px solid #ccc; 
-            resize: none; 
-            box-sizing: border-box;
-            outline: none;
+            width: 100%; height: 60px; font-family: monospace; font-size: 14px;
+            box-sizing: border-box; resize: none; margin-bottom: 5px;
         }
+        button { width: 100%; padding: 10px; background: #000; color: #fff; cursor: pointer; font-weight: bold; }
 
-        textarea:focus { border-color: #000; }
-        
-        button { 
-            width: 100%; 
-            padding: 12px; 
-            cursor: pointer; 
-            background: #000; 
-            color: #fff; 
-            border: none; 
-            font-family: monospace; 
-            font-weight: bold; 
-            text-transform: uppercase;
-        }
+        /* Pantalla de Inicio */
+        #login { position: fixed; inset: 0; background: #fff; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        input { padding: 10px; margin-bottom: 10px; border: 1px solid #000; text-align: center; }
+    </style>
+</head>
+<body>
 
-        button:hover { background: #333; }
+    <div id="login">
+        <h3>CHAT SLER - INGRESO</h3>
+        <input type="text" id="nick" placeholder="TU NOMBRE">
+        <button onclick="entrar()" style="width: 200px;">ENTRAR</button>
+    </div>
+
+    <div id="wrapper">
+        <div id="chat-container">
+            </div>
+
+        <div class="input-area">
+            <textarea id="texto" placeholder="Escribe aquí..."></textarea>
+            <button onclick="enviar()">ENVIAR (MODO SLER)</button>
+        </div>
+    </div>
+
+<script>
+    let miNick = "";
+
+    function entrar() {
+        miNick = document.getElementById('nick').value.trim();
+        if(miNick) document.getElementById('login').style.display = 'none';
+    }
+
+    function slerizar(txt) {
+        const limite = 25;
+        let palabras = txt.split(/\s+/);
+        let lineas = [];
+        let actual = "";
+
+        palabras.forEach(p => {
+            if ((actual + " " + p).trim().length <= limite) {
+                actual += (actual === "" ? "" : " ") + p;
+            } else {
+                lineas.push(actual.trim() + "-");
+                actual = "-" + p;
+            }
+        });
+        if (actual) lineas.push(actual.trim());
+        return lineas.join('\n');
+    }
+
+    function enviar() {
+        const caja = document.getElementById('texto');
+        const mazo = document.getElementById('chat-container');
         
-        /* Pantalla de Ingreso Anonimizado */
-        #login-overlay
+        if (!caja.value.trim()) return;
+
+        // Proceso SLER
+        const resultado = slerizar(caja.value);
+
+        // Crear el elemento visual
+        const div = document.createElement('div');
+        div.className = 'msg';
+        div.innerHTML = `<div class="nick-label">${miNick.toUpperCase()}</div>
+                         <div class="sler-text">${resultado}</div>`;
+        
+        mazo.appendChild(div);
+        
+        // Limpiar y bajar scroll
+        caja.value = "";
+        mazo.scrollTop = mazo.scrollHeight;
+    }
+</script>
+</body>
+</html>
