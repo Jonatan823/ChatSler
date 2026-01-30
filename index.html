@@ -1,26 +1,116 @@
-function slerize(text) {
-    // Límite estricto de 25-30 caracteres para máxima verticalidad
-    const LIMIT = 25; 
-    let words = text.split(/\s+/);
-    let lines = [];
-    let currentLine = "";
-
-    words.forEach((word, index) => {
-        // Si la palabra cabe en la línea actual
-        if ((currentLine + " " + word).trim().length <= LIMIT) {
-            currentLine += (currentLine === "" ? "" : " ") + word;
-        } else {
-            // Aplicar guion de salida en línea M
-            lines.push(currentLine.trim() + "-");
-            // Aplicar guion de entrada en línea C (Reciprocidad)
-            currentLine = "-" + word;
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat SLER - Protocolo de Comunicación Vertical</title>
+    <style>
+        /* Estética de Laboratorio: Cero Cosmética Innecesaria */
+        body { 
+            font-family: monospace; 
+            background: #f4f4f4; 
+            margin: 0; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            align-items: center; 
         }
-    });
-    
-    // Agregar la última línea sin guion final
-    if (currentLine !== "") {
-        lines.push(currentLine.trim());
-    }
-    
-    return lines.join('\n');
-}
+        
+        /* Contenedor tipo "App Nodriza" Compacta */
+        #chat-wrapper { 
+            width: 350px; 
+            background: white; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100%; 
+            box-shadow: 0 0 15px rgba(0,0,0,0.1); 
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+        }
+        
+        /* Pantalla de Mensajes */
+        #chat-container { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            background: #fafafa; 
+        }
+        
+        /* Burbuja de Mensaje SLER */
+        .message-block { 
+            background: #fff; 
+            border: 1px solid #eee; 
+            border-left: 5px solid #000; 
+            padding: 10px; 
+            border-radius: 2px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .author-tag { 
+            font-size: 10px; 
+            font-weight: bold; 
+            color: #777; 
+            border-bottom: 1px solid #eee; 
+            margin-bottom: 8px; 
+            padding-bottom: 3px; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+        }
+        
+        .content { 
+            font-size: 16px; 
+            line-height: 1.4; 
+            white-space: pre-wrap; 
+            word-wrap: break-word; 
+            color: #000;
+            letter-spacing: 0.5px;
+        }
+        
+        /* Área de Entrada Optimizada */
+        .input-area { 
+            padding: 15px; 
+            border-top: 2px solid #000; 
+            background: white; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        
+        textarea { 
+            width: 100%; 
+            height: 100px; 
+            padding: 10px; 
+            font-family: monospace; 
+            font-size: 16px; 
+            border: 1px solid #ccc; 
+            resize: none; 
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        textarea:focus { border-color: #000; }
+        
+        button { 
+            width: 100%; 
+            padding: 12px; 
+            cursor: pointer; 
+            background: #000; 
+            color: #fff; 
+            border: none; 
+            font-family: monospace; 
+            font-weight: bold; 
+            text-transform: uppercase;
+        }
+
+        button:hover { background: #333; }
+        
+        /* Pantalla de Ingreso Anonimizado */
+        #login-overlay
