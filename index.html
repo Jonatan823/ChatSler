@@ -58,52 +58,28 @@
     </div>
 
 <script>
-    let miNick = "";
+   // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
-    function entrar() {
-        miNick = document.getElementById('nick').value.trim();
-        if(miNick) document.getElementById('login').style.display = 'none';
-    }
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyD5ItA76Xc7mmihQPC2AUCHQFStii4NAUg",
+  authDomain: "sler-chat-lab.firebaseapp.com",
+  databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
+  projectId: "sler-chat-lab",
+  storageBucket: "sler-chat-lab.firebasestorage.app",
+  messagingSenderId: "594954603335",
+  appId: "1:594954603335:web:d332aa211e8ecce5521a62",
+  measurementId: "G-BBY4PKGZLH"
+};
 
-    function slerizar(txt) {
-        const limite = 25;
-        let palabras = txt.split(/\s+/);
-        let lineas = [];
-        let actual = "";
-
-        palabras.forEach(p => {
-            if ((actual + " " + p).trim().length <= limite) {
-                actual += (actual === "" ? "" : " ") + p;
-            } else {
-                lineas.push(actual.trim() + "-");
-                actual = "-" + p;
-            }
-        });
-        if (actual) lineas.push(actual.trim());
-        return lineas.join('\n');
-    }
-
-    function enviar() {
-        const caja = document.getElementById('texto');
-        const mazo = document.getElementById('chat-container');
-        
-        if (!caja.value.trim()) return;
-
-        // Proceso SLER
-        const resultado = slerizar(caja.value);
-
-        // Crear el elemento visual
-        const div = document.createElement('div');
-        div.className = 'msg';
-        div.innerHTML = `<div class="nick-label">${miNick.toUpperCase()}</div>
-                         <div class="sler-text">${resultado}</div>`;
-        
-        mazo.appendChild(div);
-        
-        // Limpiar y bajar scroll
-        caja.value = "";
-        mazo.scrollTop = mazo.scrollHeight;
-    }
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 </script>
 </body>
 </html>
