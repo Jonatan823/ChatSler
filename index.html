@@ -83,7 +83,22 @@ const analytics = getAnalytics(app);
     // --- CONEXIÓN AL PUNTO B (BASE DE DATOS) ---
 import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
 const db = getDatabase(app);
+// Buscamos el botón "ENTRAR" por su texto
+const botones = document.querySelectorAll('button');
+const botonEntrar = Array.from(botones).find(b => b.textContent === 'ENTRAR');
 
+if (botonEntrar) {
+    botonEntrar.onclick = function() {
+        const nombre = document.querySelector('input').value;
+        if (nombre !== "") {
+            console.log("Ingresando al sistema SLER como:", nombre);
+            alert("Conectando con el Motor V2 para " + nombre);
+            // Aquí es donde luego vincularemos tu IDE (Motor)
+        } else {
+            alert("Por favor, ingresa tu nombre.");
+        }
+    };
+}
 // Función para subir el texto slerizado
 window.enviarAlServidor = function(autor, texto) {
   push(ref(db, 'mensajes'), {
