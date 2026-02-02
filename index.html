@@ -114,3 +114,27 @@
                     u.id = 'side-' + m.usuario;
                     u.className = 'user-item';
                     u.innerText = m.usuario;
+                    u.onclick = function() { setTarget(m.usuario, u); };
+                    document.getElementById('user-list').appendChild(u);
+                }
+
+                // 2. FILTRO DE PRIVACIDAD CRÍTICO
+                // Solo se muestra si YO soy el destinatario O si YO soy el remitente
+                if (m.target === miNick || m.usuario === miNick) {
+                    const d = document.createElement('div');
+                    d.className = 'msg';
+                    d.style.alignSelf = (m.usuario === miNick) ? 'flex-end' : 'flex-start';
+                    d.style.borderLeft = (m.usuario === miNick) ? '5px solid blue' : '5px solid black';
+                    
+                    d.innerHTML = `
+                        <div class="nick-label">${m.usuario} > ${m.target}</div>
+                        <div style="font-size:18px;">${motorSLER(m.contenido)}</div>
+                    `;
+                    document.getElementById('chat-container').appendChild(d);
+                    document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
