@@ -2,55 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Chat SLER - Protocolo Vertical</title>
+    <title>SLER - Mensajería Privada</title>
     <style>
         body { font-family: monospace; background: #e5e5e5; margin: 0; display: flex; height: 100vh; }
-        
-        /* Sidebar para selección de Nick */
-        #sidebar { width: 200px; background: #333; color: white; display: flex; flex-direction: column; padding: 10px; }
-        .user-item { padding: 10px; cursor: pointer; border-bottom: 1px solid #444; font-size: 12px; }
-        .user-item:hover { background: #444; }
-        .user-item.active { background: blue; }
-
-        #wrapper { flex: 1; background: white; display: flex; flex-direction: column; border-left: 2px solid #000; position: relative; }
-        #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fff; }
-        
-        .msg { background: #f9f9f9; border-left: 5px solid #000; padding: 8px; border-bottom: 1px solid #ddd; max-width: 300px; }
-        .nick-label { font-size: 10px; font-weight: bold; color: blue; margin-bottom: 4px; }
-        
-        /* Estilos Semánticos SLER */
+        #sidebar { width: 180px; background: #222; color: white; display: flex; flex-direction: column; padding: 10px; flex-shrink: 0; }
+        .user-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #333; font-size: 11px; }
+        .user-item.active { background: #0000ff; font-weight: bold; }
+        #wrapper { flex: 1; background: white; display: flex; flex-direction: column; border-left: 2px solid #000; overflow: hidden; }
+        #chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { background: #fdfdfd; border-left: 5px solid #000; padding: 12px; border-bottom: 1px solid #eee; width: fit-content; max-width: 85%; }
+        /* Estilos SLER */
         .sler-m { color: #000; font-weight: bold; }
-        .sler-c { color: #555; font-style: italic; }
-
-        .input-area { padding: 10px; background: #eee; border-top: 2px solid #000; }
-        textarea { width: 100%; height: 60px; font-family: monospace; font-size: 14px; box-sizing: border-box; resize: none; margin-bottom: 5px; }
-        button { width: 100%; padding: 10px; background: #000; color: #fff; cursor: pointer; font-weight: bold; }
-        
-        #login { position: fixed; inset: 0; background: #fff; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        input { padding: 10px; margin-bottom: 10px; border: 1px solid #000; text-align: center; }
+        .sler-c { color: #000; font-weight: bold; }
+        .line-break { display: block; margin-bottom: 2px; }
+        .input-area { padding: 15px; background: #eee; border-top: 2px solid #000; }
+        textarea { width: 100%; height: 80px; font-family: monospace; font-size: 15px; resize: none; margin-bottom: 8px; border: 1px solid #000; padding: 10px; }
+        button { width: 100%; padding: 12px; background: #000; color: #fff; cursor: pointer; font-weight: bold; border: none; }
+        #login { position: fixed; inset: 0; background: #fff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        input { padding: 12px; margin-bottom: 10px; border: 1px solid #000; text-align: center; width: 220px; }
     </style>
 </head>
 <body>
 
     <div id="login">
         <h3>CHAT SLER - INGRESO</h3>
-        <input type="text" id="nick" placeholder="TU NOMBRE">
-        <button id="btn-entrar" style="width: 200px;">ENTRAR</button>
+        <input type="text" id="nick-login" placeholder="TU NOMBRE">
+        <button onclick="acceder()" style="width: 220px;">ENTRAR</button>
     </div>
 
     <aside id="sidebar">
-        <div style="font-size: 10px; margin-bottom: 10px; color: #aaa;">SELECCIONAR DESTINO:</div>
+        <div style="font-size: 9px; margin-bottom: 15px; color: #888;">DESTINATARIO:</div>
         <div id="user-list">
-            <div class="user-item active" onclick="setTarget('GLOBAL', this)">● GLOBAL</div>
-        </div>
+            </div>
     </aside>
 
     <div id="wrapper">
         <div id="chat-container"></div>
         <div class="input-area">
-            <div id="target-label" style="font-size: 10px; color: #666; margin-bottom: 5px;">PARA: GLOBAL</div>
-            <textarea id="texto" placeholder="Escribe aquí..."></textarea>
-            <button id="btn-enviar">ENVIAR (MODO SLER)</button>
+            <div id="target-label" style="font-size: 10px; color: blue; margin-bottom: 5px;">PARA: (Selecciona un nick)</div>
+            <textarea id="texto" placeholder="Escribe mensaje..."></textarea>
+            <button id="btn-enviar">ENVIAR PRIVADO (SLER)</button>
         </div>
     </div>
 
@@ -58,7 +49,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        var firebaseConfig = {
+        const firebaseConfig = {
             apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
             authDomain: "sler-chat-lab.firebaseapp.com",
             databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
@@ -67,28 +58,27 @@
             messagingSenderId: "594954603335",
             appId: "1:594954603335:web:d332aa211e8ecce5521a62"
         };
-
         firebase.initializeApp(firebaseConfig);
-        var db = firebase.database();
-        var targetNick = "GLOBAL";
+        const db = firebase.database();
+        
+        let miNick = "";
+        let targetNick = "";
 
-        // Filtro de malas palabras simple
-        const blacklist = ["mala1", "mala2", "mala3"]; // Agregar aquí términos a filtrar
-        function filtrarTexto(t) {
-            let reg = new RegExp(blacklist.join("|"), "gi");
-            return t.replace(reg, "****");
+        function acceder() {
+            miNick = document.getElementById('nick-login').value.trim();
+            if (miNick !== "") {
+                document.getElementById('login').style.display = 'none';
+                escucharMensajes();
+            }
         }
 
-        // Motor Semántico SLER: Fragmentación M y C
-        function procesarSLER(texto) {
-            return texto.split(" ").map(pal => {
-                if (pal.length > 5) {
-                    let m = pal.substring(0, Math.ceil(pal.length / 2));
-                    let c = pal.substring(Math.ceil(pal.length / 2));
-                    // M: guion final (referencia cierre) | C: guion inicial (referencia apertura)
-                    return `<span class="sler-m">${m}-</span><br><span class="sler-c">-${c}</span>`;
+        function motorSLER(texto) {
+            return texto.split(" ").map(word => {
+                if (word.length > 4) {
+                    let mid = Math.ceil(word.length / 2);
+                    return `<span class="sler-m">${word.substring(0, mid)}-</span><span class="line-break"></span><span class="sler-c">-${word.substring(mid)}</span>`;
                 }
-                return pal;
+                return word;
             }).join(" ");
         }
 
@@ -99,49 +89,28 @@
             el.classList.add('active');
         }
 
-        document.getElementById('btn-entrar').onclick = function() {
-            if (document.getElementById('nick').value.trim() !== "") {
-                document.getElementById('login').style.display = 'none';
-            }
-        };
-
         document.getElementById('btn-enviar').onclick = function() {
-            var msj = document.getElementById('texto').value.trim();
-            if (msj !== "") {
-                msj = filtrarTexto(msj);
+            const msj = document.getElementById('texto').value.trim();
+            if (msj !== "" && targetNick !== "") {
                 db.ref('mensajes').push({
-                    usuario: document.getElementById('nick').value,
+                    usuario: miNick,
                     target: targetNick,
                     contenido: msj,
                     timestamp: Date.now()
                 });
                 document.getElementById('texto').value = "";
+            } else if (targetNick === "") {
+                alert("Selecciona un destinatario en el sidebar.");
             }
         };
 
-        db.ref('mensajes').on('child_added', function(data) {
-            var msg = data.val();
-            
-            // Actualizar lista de nicks en el sidebar
-            if (!document.getElementById('side-' + msg.usuario)) {
-                let divUser = document.createElement('div');
-                divUser.id = 'side-' + msg.usuario;
-                divUser.className = 'user-item';
-                divUser.innerText = msg.usuario;
-                divUser.onclick = function() { setTarget(msg.usuario, divUser); };
-                document.getElementById('user-list').appendChild(divUser);
-            }
-
-            // Renderizar mensaje con lógica SLER
-            var div = document.createElement('div');
-            div.className = 'msg';
-            div.innerHTML = `
-                <div class="nick-label">${msg.usuario} > ${msg.target || 'GLOBAL'}</div>
-                <div style="font-size:16px; line-height:1.2;">${procesarSLER(msg.contenido)}</div>
-            `;
-            document.getElementById('chat-container').appendChild(div);
-            document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
-        });
-    </script>
-</body>
-</html>
+        function escucharMensajes() {
+            db.ref('mensajes').on('child_added', function(snap) {
+                const m = snap.val();
+                
+                // 1. Agregar nicks al sidebar (si no están)
+                if (!document.getElementById('side-' + m.usuario) && m.usuario !== miNick) {
+                    let u = document.createElement('div');
+                    u.id = 'side-' + m.usuario;
+                    u.className = 'user-item';
+                    u.innerText = m.usuario;
