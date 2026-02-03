@@ -2,68 +2,76 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Chat Sler - Densidad Optimizada</title>
+    <title>SLER - Sistema de Lectura Recíproco</title>
     <style>
-        body { font-family: 'Courier New', monospace; background: #e5e5e5; margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        /* Estética Monospace exacta de tus capturas */
+        * { box-sizing: border-box; }
+        body { font-family: 'Courier New', monospace; background: #d1d1d1; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
         
-        #wrapper { 
-            width: 380px; /* Ancho para ~30 caracteres */
-            background: white; border-left: 2px solid #000; border-right: 2px solid #000; 
-            display: flex; flex-direction: column; position: relative; 
-        }
+        #desktop { width: 95vw; height: 90vh; background: #fff; border: 3px solid #000; display: flex; position: relative; box-shadow: 10px 10px 0px #555; }
+
+        /* PANEL LATERAL (Nicks) */
+        #sidebar { width: 250px; border-right: 3px solid #000; background: #f0f0f0; display: flex; flex-direction: column; }
+        .sidebar-header { background: #000; color: #fff; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; }
+        #lista-usuarios { flex: 1; overflow-y: auto; padding: 10px; }
+        .user-card { cursor: pointer; border: 1px solid #000; padding: 8px; margin-bottom: 5px; background: #fff; font-weight: bold; font-size: 14px; }
+        .user-card:hover { background: #000; color: #fff; }
+
+        /* SALA CENTRAL */
+        #main-room { flex: 1; display: flex; flex-direction: column; background: #fff; }
+        #chat-flow { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
         
-        #barra-nicks { background: #000; color: #fff; padding: 10px; font-size: 11px; }
-        #lista-usuarios { display: flex; gap: 8px; overflow-x: auto; margin-top: 5px; }
-        .usuario-item { cursor: pointer; padding: 4px 10px; border: 1px solid #555; background: #222; font-size: 12px; }
+        /* MOTOR SLER: ZIG-ZAG REAL */
+        .msg-container { width: 380px; align-self: center; display: flex; flex-wrap: wrap; column-gap: 8px; row-gap: 5px; }
+        .sler-word-complex { display: inline-flex; flex-direction: column; width: fit-content; min-width: 80px; }
+        .sler-m { align-self: flex-start; font-weight: bold; font-size: 18px; border-bottom: 1px solid #ddd; width: 100%; text-align: left; }
+        .sler-c { align-self: flex-end; font-weight: bold; font-size: 18px; width: 100%; text-align: right; color: #444; }
+        .sler-simple { font-weight: bold; font-size: 18px; display: inline-block; align-self: center; }
 
-        /* CONTENEDOR DE LECTURA: Permite varias palabras por línea */
-        #chat-container { flex: 1; overflow-y: auto; padding: 20px; background: #fff; display: flex; flex-direction: column; gap: 25px; }
-        
-        .msg-body { 
-            width: 100%; 
-            display: flex; 
-            flex-wrap: wrap; /* PERMITE DENSIDAD DE PALABRAS POR RENGLÓN */
-            align-items: baseline;
-            column-gap: 8px; /* Espacio natural entre palabras */
-            row-gap: 4px; 
-            font-size: 18px; /* Tamaño igual a tu tradicional */
-            line-height: 1.4;
-        }
+        /* BOTONERA INFERIOR */
+        #controls { padding: 10px; border-top: 3px solid #000; display: flex; gap: 10px; background: #eee; }
+        .btn { padding: 10px; cursor: pointer; font-family: 'Courier New', monospace; font-weight: bold; border: 2px solid #000; }
+        .btn-black { background: #000; color: #fff; }
+        .btn-white { background: #fff; color: #000; }
 
-        /* MOTOR SLER: Solo rompe si es > 8 letras */
-        .sler-word-complex { 
-            display: inline-flex; 
-            flex-direction: column; 
-            vertical-align: middle;
-            min-width: fit-content;
-        }
-        .sler-m { align-self: flex-start; font-weight: bold; line-height: 0.8; }
-        .sler-c { align-self: flex-end; font-weight: bold; line-height: 0.8; color: #444; }
+        /* LOGIN */
+        #login-overlay { position: absolute; inset: 0; background: #fff; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        input { padding: 10px; border: 2px solid #000; width: 280px; margin-bottom: 10px; font-family: 'Courier New', monospace; text-align: center; }
 
-        .sler-simple { display: inline-block; font-weight: bold; }
-
-        /* UI */
-        #modal-envio { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: white; padding: 20px; width: 100%; border: 3px solid #000; }
-        textarea { width: 100%; height: 100px; font-family: 'Courier New', monospace; font-size: 16px; margin-top: 10px; border: 2px solid #000; padding: 8px; box-sizing: border-box; }
-        .btn-negro { width: 100%; padding: 15px; background: #000; color: #fff; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        /* MODAL MENSAJE */
+        #modal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; align-items: center; justify-content: center; }
+        .modal-body { background: #fff; border: 3px solid #000; padding: 20px; width: 400px; }
+        textarea { width: 100%; height: 100px; border: 2px solid #000; font-family: 'Courier New', monospace; padding: 10px; resize: none; }
     </style>
 </head>
 <body>
 
-    <div id="wrapper">
-        <div id="barra-nicks">
-            <span>DIRECTORIO:</span>
-            <div id="lista-usuarios"></div>
+    <div id="desktop">
+        <div id="login-overlay">
+            <h1 style="text-decoration: underline;">SLER - INGRESO</h1>
+            <input type="text" id="nickIn" placeholder="NICK">
+            <input type="password" id="passIn" placeholder="CONTRASEÑA">
+            <button class="btn btn-black" onclick="acceder()">ENTRAR / REGISTRAR</button>
         </div>
-        <div id="chat-container"></div>
-        
-        <div id="modal-envio">
-            <div class="modal-content">
-                <h3 id="titulo-destino" style="margin:0; font-size:12px;">Para: </h3>
-                <textarea id="texto-sler" placeholder="Escribe tu mensaje..."></textarea>
-                <button class="btn-negro" onclick="enviarMensaje()">ENVIAR MODO SLER</button>
-                <button class="btn-negro" style="background:#fff; color:#000; border:1px solid #000" onclick="cerrarModal()">CANCELAR</button>
+
+        <div id="sidebar">
+            <div class="sidebar-header">PARTICIPANTES EN LÍNEA</div>
+            <div id="lista-usuarios"></div>
+            <div id="controls">
+                <button class="btn btn-white" style="width:100%" onclick="cerrarSesion()">SALIR (LOGIN)</button>
+            </div>
+        </div>
+
+        <div id="main-room">
+            <div id="chat-flow"></div>
+        </div>
+
+        <div id="modal">
+            <div class="modal-body">
+                <div id="dest-label" style="font-weight:bold; margin-bottom:10px;">PARA: </div>
+                <textarea id="texto-sler" placeholder="Escribe aquí tu mensaje..."></textarea>
+                <button class="btn btn-black" style="width:100%; margin-top:10px;" onclick="enviar()">ENVIAR MENSAJE</button>
+                <button class="btn btn-white" style="width:100%; margin-top:5px;" onclick="cerrarModal()">CANCELAR</button>
             </div>
         </div>
     </div>
@@ -83,64 +91,82 @@
         };
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
-        var miNick = "Ribot"; // Nick por defecto para pruebas rápidas
-        var destinoNick = "";
+        var miNick = "";
+        var destino = "";
 
-        // MOTOR REFINADO: DENSIDAD HORIZONTAL + ZIGZAG SELECTIVO
-        function motorSLER(texto) {
-            return texto.split(" ").map(w => {
+        function acceder() {
+            let n = document.getElementById('nickIn').value.trim();
+            let p = document.getElementById('passIn').value.trim();
+            if(!n || !p) return;
+            miNick = n;
+            db.ref('perfiles/' + n).set({ pass: p, online: true });
+            document.getElementById('login-overlay').style.display = 'none';
+            init();
+        }
+
+        function init() {
+            // Cargar Usuarios
+            db.ref('perfiles').on('value', snap => {
+                let list = document.getElementById('lista-usuarios');
+                list.innerHTML = "";
+                snap.forEach(u => {
+                    if(u.key !== miNick) {
+                        let div = document.createElement('div');
+                        div.className = 'user-card';
+                        div.innerText = u.key;
+                        div.onclick = () => abrirEditor(u.key);
+                        list.appendChild(div);
+                    }
+                });
+            });
+
+            // Escuchar Mensajes (Sler Real Zig-Zag)
+            db.ref('mensajes').on('child_added', snap => {
+                let m = snap.val();
+                let flow = document.getElementById('chat-flow');
+                let wrap = document.createElement('div');
+                wrap.className = 'msg-container';
+                wrap.innerHTML = motorSLER(m.txt);
+                flow.appendChild(wrap);
+                flow.scrollTop = flow.scrollHeight;
+            });
+        }
+
+        function motorSLER(t) {
+            return t.split(" ").map(w => {
+                // Solo rompe si tiene más de 8 letras
                 if (w.length > 8) {
                     let m = Math.ceil(w.length / 2);
-                    return `<span class="sler-word-complex">
-                                <span class="sler-m">${w.substring(0, m)}-</span>
-                                <span class="sler-c">-${w.substring(m)}</span>
-                            </span>`;
+                    return `<div class="sler-word-complex">
+                                <div class="sler-m">${w.substring(0, m)}-</div>
+                                <div class="sler-c">-${w.substring(m)}</div>
+                            </div>`;
                 }
-                return `<span class="sler-simple">${w}</span>`;
+                return `<div class="sler-simple">${w}</div>`;
             }).join("");
         }
 
-        function escucharMensajes() {
-            db.ref('mensajes').limitToLast(10).on('child_added', snap => {
-                var m = snap.val();
-                var d = document.createElement('div');
-                d.className = 'msg-body';
-                d.innerHTML = motorSLER(m.txt);
-                document.getElementById('chat-container').appendChild(d);
-                document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
-            });
+        function abrirEditor(n) {
+            destino = n;
+            document.getElementById('dest-label').innerText = "PARA: " + n;
+            document.getElementById('modal').style.display = 'flex';
         }
 
-        function cargarDirectorio() {
-            db.ref('perfiles').on('value', snap => {
-                const list = document.getElementById('lista-usuarios');
-                list.innerHTML = "";
-                snap.forEach(u => {
-                    let el = document.createElement('div');
-                    el.className = 'usuario-item';
-                    el.innerText = u.key;
-                    el.onclick = () => {
-                        destinoNick = u.key;
-                        document.getElementById('titulo-destino').innerText = "Para: " + u.key;
-                        document.getElementById('modal-envio').style.display = 'flex';
-                    };
-                    list.appendChild(el);
-                });
-            });
-        }
-
-        function enviarMensaje() {
-            var txt = document.getElementById('texto-sler').value.trim();
-            if (txt) {
-                db.ref('mensajes').push({ de: miNick, para: destinoNick, txt: txt, time: Date.now() });
+        function enviar() {
+            let txt = document.getElementById('texto-sler').value.trim();
+            if(txt) {
+                db.ref('mensajes').push({ de: miNick, para: destino, txt: txt });
                 cerrarModal();
             }
         }
 
-        function cerrarModal() { document.getElementById('modal-envio').style.display = 'none'; document.getElementById('texto-sler').value = ""; }
-
-        cargarDirectorio();
-        escucharMensajes();
+        function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
+        
+        function cerrarSesion() {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('chat-flow').innerHTML = "";
+            miNick = "";
+        }
     </script>
 </body>
 </html>
