@@ -2,77 +2,86 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SLER - Sistema de Lectura Recíproco</title>
+    <title>SLER - Escritorio de Práctica e Inteligencia</title>
     <style>
-        /* Estética Monospace exacta de tus capturas */
         * { box-sizing: border-box; }
-        body { font-family: 'Courier New', monospace; background: #d1d1d1; margin: 0; height: 100vh; display: flex; align-items: center; justify-content: center; }
+        body { font-family: 'Courier New', monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
         
-        #desktop { width: 95vw; height: 90vh; background: #fff; border: 3px solid #000; display: flex; position: relative; box-shadow: 10px 10px 0px #555; }
+        /* ESTRUCTURA TRIPLE PANEL */
+        #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
+        #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
+        #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* PANEL LATERAL (Nicks) */
-        #sidebar { width: 250px; border-right: 3px solid #000; background: #f0f0f0; display: flex; flex-direction: column; }
-        .sidebar-header { background: #000; color: #fff; padding: 10px; font-size: 12px; font-weight: bold; text-align: center; }
-        #lista-usuarios { flex: 1; overflow-y: auto; padding: 10px; }
-        .user-card { cursor: pointer; border: 1px solid #000; padding: 8px; margin-bottom: 5px; background: #fff; font-weight: bold; font-size: 14px; }
-        .user-card:hover { background: #000; color: #fff; }
+        /* LOGIN CON EMAIL */
+        #login-screen { position: absolute; inset: 0; background: #fff; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
+        .login-box { width: 350px; text-align: center; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 8px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; }
 
-        /* SALA CENTRAL */
-        #main-room { flex: 1; display: flex; flex-direction: column; background: #fff; }
-        #chat-flow { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        /* MAIN: AREA DE PRÁCTICA (60 caracteres) */
+        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; }
+        #practice-board { flex: 1; overflow-y: auto; padding: 25px; line-height: 1.6; }
+        #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
+        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 16px; padding: 10px; resize: none; }
+
+        /* COMPONENTES SLER */
+        .sler-line { width: 600px; margin: 0 auto 15px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .word-unit { display: inline-flex; flex-direction: column; min-width: 40px; }
+        .m-part { align-self: flex-start; font-weight: bold; font-size: 18px; border-bottom: 1px solid #ccc; width: 100%; }
+        .c-part { align-self: flex-end; font-weight: bold; font-size: 18px; text-align: right; color: #555; width: 100%; }
         
-        /* MOTOR SLER: ZIG-ZAG REAL */
-        .msg-container { width: 380px; align-self: center; display: flex; flex-wrap: wrap; column-gap: 8px; row-gap: 5px; }
-        .sler-word-complex { display: inline-flex; flex-direction: column; width: fit-content; min-width: 80px; }
-        .sler-m { align-self: flex-start; font-weight: bold; font-size: 18px; border-bottom: 1px solid #ddd; width: 100%; text-align: left; }
-        .sler-c { align-self: flex-end; font-weight: bold; font-size: 18px; width: 100%; text-align: right; color: #444; }
-        .sler-simple { font-weight: bold; font-size: 18px; display: inline-block; align-self: center; }
+        /* BOTONES LATERALES */
+        .nav-btn { width: 100%; padding: 12px 5px; background: #fff; border: 2px solid #000; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
+        .nav-btn:hover { background: #000; color: #fff; }
 
-        /* BOTONERA INFERIOR */
-        #controls { padding: 10px; border-top: 3px solid #000; display: flex; gap: 10px; background: #eee; }
-        .btn { padding: 10px; cursor: pointer; font-family: 'Courier New', monospace; font-weight: bold; border: 2px solid #000; }
-        .btn-black { background: #000; color: #fff; }
-        .btn-white { background: #fff; color: #000; }
-
-        /* LOGIN */
-        #login-overlay { position: absolute; inset: 0; background: #fff; z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        input { padding: 10px; border: 2px solid #000; width: 280px; margin-bottom: 10px; font-family: 'Courier New', monospace; text-align: center; }
-
-        /* MODAL MENSAJE */
-        #modal { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 6000; align-items: center; justify-content: center; }
-        .modal-body { background: #fff; border: 3px solid #000; padding: 20px; width: 400px; }
-        textarea { width: 100%; height: 100px; border: 2px solid #000; font-family: 'Courier New', monospace; padding: 10px; resize: none; }
+        /* PRIVADOS (Flotante para no tapar el centro) */
+        #private-modal { display: none; position: fixed; right: 210px; bottom: 120px; width: 320px; background: white; border: 4px solid #000; z-index: 5000; box-shadow: 5px 5px 0 #000; }
+        .private-header { background: blue; color: white; padding: 5px; font-size: 12px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
 
-    <div id="desktop">
-        <div id="login-overlay">
-            <h1 style="text-decoration: underline;">SLER - INGRESO</h1>
-            <input type="text" id="nickIn" placeholder="NICK">
-            <input type="password" id="passIn" placeholder="CONTRASEÑA">
-            <button class="btn btn-black" onclick="acceder()">ENTRAR / REGISTRAR</button>
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="text-decoration: underline;">CHAT SLER - 2026</h2>
+            <input type="text" id="nick" placeholder="NICK">
+            <input type="password" id="pass" placeholder="CONTRASEÑA">
+            <input type="email" id="mail" placeholder="EMAIL (debe contener @)">
+            <button class="nav-btn" style="background: #000; color: #fff; font-size: 14px;" onclick="acceder()">INGRESAR / REGISTRAR</button>
         </div>
+    </div>
 
-        <div id="sidebar">
-            <div class="sidebar-header">PARTICIPANTES EN LÍNEA</div>
-            <div id="lista-usuarios"></div>
-            <div id="controls">
-                <button class="btn btn-white" style="width:100%" onclick="cerrarSesion()">SALIR (LOGIN)</button>
+    <div id="sidebar-left">
+        <div class="practice-header">CONTACTOS</div>
+        <div id="users-list" style="flex:1; padding:10px;"></div>
+        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR (LOGIN)</button>
+    </div>
+
+    <div id="main-practice">
+        <div class="practice-header">ESCRITORIO PRIVADO DE PRÁCTICA - 60 CARACTERES</div>
+        <div id="practice-board"></div>
+        <div id="input-zone">
+            <textarea id="main-input" placeholder="Escribe para practicar el sistema SLER..."></textarea>
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <button class="nav-btn" onclick="procesarPractica('sler')">PROCESAR SLER</button>
+                <button class="nav-btn" onclick="procesarPractica('normal')">TEXTO NORMAL</button>
+                <button class="nav-btn" style="width:100px" onclick="contar()">CONTAR CH</button>
             </div>
         </div>
+    </div>
 
-        <div id="main-room">
-            <div id="chat-flow"></div>
-        </div>
+    <div id="sidebar-right">
+        <div style="font-weight:bold; font-size:12px; margin-bottom:5px;">HERRAMIENTAS:</div>
+        <button class="nav-btn" onclick="alert('Iniciando Test...')">INGRESAR AL TEST</button>
+        <button class="nav-btn">PÁGINA PRINCIPAL</button>
+        <button class="nav-btn">¿QUÉ ES SLER?</button>
+        <button class="nav-btn">INVITAR CONTACTOS</button>
+    </div>
 
-        <div id="modal">
-            <div class="modal-body">
-                <div id="dest-label" style="font-weight:bold; margin-bottom:10px;">PARA: </div>
-                <textarea id="texto-sler" placeholder="Escribe aquí tu mensaje..."></textarea>
-                <button class="btn btn-black" style="width:100%; margin-top:10px;" onclick="enviar()">ENVIAR MENSAJE</button>
-                <button class="btn btn-white" style="width:100%; margin-top:5px;" onclick="cerrarModal()">CANCELAR</button>
-            </div>
+    <div id="private-modal">
+        <div class="private-header"><span id="dest-name">Para: </span><span onclick="cerrarPrivado()" style="cursor:pointer">[X]</span></div>
+        <div style="padding:10px">
+            <textarea id="priv-input" style="height:60px" placeholder="Mensaje privado (30 ch)..."></textarea>
+            <button class="nav-btn" style="margin-top:5px" onclick="enviarPrivado()">ENVIAR PRIVADO</button>
         </div>
     </div>
 
@@ -80,93 +89,72 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
-            authDomain: "sler-chat-lab.firebaseapp.com",
-            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
-            projectId: "sler-chat-lab",
-            storageBucket: "sler-chat-lab.firebasestorage.app",
-            messagingSenderId: "594954603335",
-            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
-        };
-        firebase.initializeApp(firebaseConfig);
+        var config = { databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com" }; // Config simplificada
+        firebase.initializeApp(config);
         var db = firebase.database();
         var miNick = "";
-        var destino = "";
 
         function acceder() {
-            let n = document.getElementById('nickIn').value.trim();
-            let p = document.getElementById('passIn').value.trim();
-            if(!n || !p) return;
-            miNick = n;
-            db.ref('perfiles/' + n).set({ pass: p, online: true });
-            document.getElementById('login-overlay').style.display = 'none';
-            init();
-        }
-
-        function init() {
-            // Cargar Usuarios
-            db.ref('perfiles').on('value', snap => {
-                let list = document.getElementById('lista-usuarios');
-                list.innerHTML = "";
-                snap.forEach(u => {
-                    if(u.key !== miNick) {
-                        let div = document.createElement('div');
-                        div.className = 'user-card';
-                        div.innerText = u.key;
-                        div.onclick = () => abrirEditor(u.key);
-                        list.appendChild(div);
-                    }
-                });
-            });
-
-            // Escuchar Mensajes (Sler Real Zig-Zag)
-            db.ref('mensajes').on('child_added', snap => {
-                let m = snap.val();
-                let flow = document.getElementById('chat-flow');
-                let wrap = document.createElement('div');
-                wrap.className = 'msg-container';
-                wrap.innerHTML = motorSLER(m.txt);
-                flow.appendChild(wrap);
-                flow.scrollTop = flow.scrollHeight;
-            });
-        }
-
-        function motorSLER(t) {
-            return t.split(" ").map(w => {
-                // Solo rompe si tiene más de 8 letras
-                if (w.length > 8) {
-                    let m = Math.ceil(w.length / 2);
-                    return `<div class="sler-word-complex">
-                                <div class="sler-m">${w.substring(0, m)}-</div>
-                                <div class="sler-c">-${w.substring(m)}</div>
-                            </div>`;
-                }
-                return `<div class="sler-simple">${w}</div>`;
-            }).join("");
-        }
-
-        function abrirEditor(n) {
-            destino = n;
-            document.getElementById('dest-label').innerText = "PARA: " + n;
-            document.getElementById('modal').style.display = 'flex';
-        }
-
-        function enviar() {
-            let txt = document.getElementById('texto-sler').value.trim();
-            if(txt) {
-                db.ref('mensajes').push({ de: miNick, para: destino, txt: txt });
-                cerrarModal();
+            miNick = document.getElementById('nick').value;
+            if(miNick && document.getElementById('mail').value.includes('@')) {
+                document.getElementById('login-screen').style.display = 'none';
+                cargarContactos();
             }
         }
 
-        function cerrarModal() { document.getElementById('modal').style.display = 'none'; }
-        
-        function cerrarSesion() {
-            document.getElementById('login-overlay').style.display = 'flex';
-            document.getElementById('chat-flow').innerHTML = "";
-            miNick = "";
+        /* SUMATORIA MATRICIAL Y APLANADO PARA EL MOTOR */
+        function motorSLER(texto, limite) {
+            let palabras = texto.split(" ");
+            let lineas = [];
+            let lineaActual = [];
+            let cuenta = 0;
+
+            palabras.forEach(w => {
+                if (cuenta + w.length > limite) {
+                    lineas.push(lineaActual);
+                    lineaActual = [];
+                    cuenta = 0;
+                }
+                lineaActual.push(w);
+                cuenta += w.length + 1;
+            });
+            lineas.push(lineaActual);
+
+            // Aplanado y renderizado con reglas de 3 caracteres para práctica
+            return lineas.map(linea => {
+                let contenido = linea.map(w => {
+                    if (w.length > 3) {
+                        let m = Math.ceil(w.length / 2);
+                        return `<div class="word-unit"><div class="m-part">${w.substring(0,m)}-</div><div class="c-part">-${w.substring(m)}</div></div>`;
+                    }
+                    return `<span style="font-weight:bold; font-size:18px;">${w}</span>`;
+                }).join(" ");
+                return `<div class="sler-line" style="width:${limite*10}px">${contenido}</div>`;
+            }).join("");
         }
+
+        function procesarPractica(modo) {
+            let t = document.getElementById('main-input').value;
+            let board = document.getElementById('practice-board');
+            if(modo === 'sler') board.innerHTML += motorSLER(t, 60);
+            else board.innerHTML += `<div style="width:600px; margin:10px auto; font-weight:bold">${t}</div>`;
+            document.getElementById('main-input').value = "";
+        }
+
+        function cargarContactos() {
+            // Simulación de directorio para la demo
+            let list = document.getElementById('users-list');
+            ['marcos', 'pepe', 'lucia'].forEach(u => {
+                let d = document.createElement('div');
+                d.className = 'nav-btn'; d.style.textAlign = 'center'; d.style.marginBottom='5px';
+                d.innerText = u;
+                d.onclick = () => { document.getElementById('private-modal').style.display='block'; document.getElementById('dest-name').innerText="Para: "+u; };
+                list.appendChild(d);
+            });
+        }
+
+        function cerrarPrivado() { document.getElementById('private-modal').style.display='none'; }
+        function contar() { alert("Caracteres en el último bloque: " + document.getElementById('main-input').value.length); }
     </script>
 </body>
 </html>
