@@ -2,150 +2,23 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SLER - Escritorio Personal 2026</title>
+    <title>SLER - Chat 2026</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Courier New', Courier, monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
         
-        /* ESTRUCTURA TRIPARTITA */
+        /* ESTRUCTURA */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* INTERFAZ DE LOGIN */
+        /* LOGIN: CHAT SLER */
         #login-screen { position: absolute; inset: 0; background: #fff; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
         .login-box { width: 450px; text-align: center; }
         .login-box h2 { text-decoration: underline; margin-bottom: 30px; letter-spacing: 2px; }
         .login-box input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-size: 18px; }
 
-        /* PANEL CENTRAL Y SLER: PESO NORMAL */
+        /* PIZARRA DE PRÁCTICA */
         .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
         #practice-board { flex: 1; overflow-y: auto; padding: 35px; background: #fff; }
-        #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
-        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
-
-        /* UNIFICACIÓN SIN NEGRITA */
-        .sler-line, .texto-normal-box { 
-            width: 600px; 
-            margin: 0 auto 30px; 
-            font-family: 'Courier New', monospace; 
-            font-size: 19px; 
-            font-weight: normal; /* PESO NORMAL COMO PEDISTE */
-            color: #000; 
-        }
-        .sler-line { display: flex; flex-wrap: wrap; column-gap: 10px; row-gap: 18px; }
-        .word-unit { display: inline-flex; flex-direction: column; }
-        .m-part { align-self: flex-start; text-align: left; line-height: 0.9; }
-        .c-part { align-self: flex-end; text-align: right; line-height: 0.9; }
-        .sler-simple { align-self: center; }
-        .texto-normal-box { border-left: 4px solid #000; padding-left: 20px; line-height: 1.4; }
-
-        /* BOTONERA */
-        .nav-btn { width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; }
-        .nav-btn:hover { background: #000; color: #fff; }
-    </style>
-</head>
-<body>
-
-    <div id="login-screen">
-        <div class="login-box">
-            <h2><u>SLER - ESCRITORIO PERSONAL</u></h2>
-            <input type="text" id="nick" placeholder="NICK">
-            <input type="password" id="pass" placeholder="CONTRASEÑA">
-            <input type="email" id="mail" placeholder="EMAIL">
-            <button class="nav-btn" style="background: #000; color: #fff;" onclick="acceder()">ENTRAR A PRACTICAR</button>
-        </div>
-    </div>
-
-    <div id="sidebar-left">
-        <div class="practice-header">CONTACTOS</div>
-        <div id="users-list" style="flex:1; padding:10px;">
-            <div class="nav-btn" style="margin-bottom:5px;">MARCOS</div>
-            <div class="nav-btn" style="margin-bottom:5px;">PEPE</div>
-            <div class="nav-btn" style="margin-bottom:5px;">LUCIA</div>
-        </div>
-        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR (LOGIN)</button>
-    </div>
-
-    <div id="main-practice">
-        <div class="practice-header">ESCRITORIO PERSONAL - PRÁCTICA 60 CH</div>
-        <div id="practice-board"></div>
-        <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe para practicar..."></textarea>
-            <div style="display:flex; gap:10px; margin-top:5px;">
-                <button class="nav-btn" onclick="procesar('sler')">PROCESAR SLER</button>
-                <button class="nav-btn" onclick="procesar('normal')">TEXTO NORMAL</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="sidebar-right">
-        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">HERRAMIENTAS:</div>
-        <button class="nav-btn">INGRESAR AL TEST</button>
-        <button class="nav-btn">PÁGINA PRINCIPAL</button>
-        <button class="nav-btn">¿QUÉ ES SLER?</button>
-        <button class="nav-btn">INVITAR CONTACTOS</button>
-    </div>
-
-    <script>
-        function acceder() {
-            const nick = document.getElementById('nick').value;
-            const pass = document.getElementById('pass').value;
-            if(nick && pass) {
-                document.getElementById('login-screen').style.display = 'none';
-            } else {
-                alert("Ingresa Nick y Contraseña.");
-            }
-        }
-
-        function motorSLER(texto) {
-            const MOLDE = 60;
-            let masa = texto.replace(/\s+/g, ' ').trim();
-            let palabras = masa.split(" ");
-            let lineasHtml = "";
-            let grupo = [];
-            let cuenta = 0;
-
-            palabras.forEach(w => {
-                if (cuenta + w.length > MOLDE) {
-                    lineasHtml += renderFila(grupo);
-                    grupo = []; cuenta = 0;
-                }
-                grupo.push(w);
-                cuenta += w.length + 1;
-            });
-            lineasHtml += renderFila(grupo);
-            return lineasHtml;
-        }
-
-        function renderFila(palabras) {
-            if (!palabras.length) return "";
-            let html = palabras.map(w => {
-                if (w.length > 3) {
-                    let p = Math.ceil(w.length / 2);
-                    return `<div class="word-unit">
-                                <div class="m-part">${w.substring(0, p)}-</div>
-                                <div class="c-part">-${w.substring(p)}</div>
-                            </div>`;
-                }
-                return `<span class="sler-simple">${w}</span>`;
-            }).join(" ");
-            return `<div class="sler-line">${html}</div>`;
-        }
-
-        function procesar(modo) {
-            let input = document.getElementById('main-input');
-            let board = document.getElementById('practice-board');
-            if(!input.value) return;
-
-            if(modo === 'sler') {
-                board.innerHTML += motorSLER(input.value);
-            } else {
-                board.innerHTML += `<div class="texto-normal-box">${input.value}</div>`;
-            }
-            input.value = "";
-            board.scrollTop = board.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+        #input
