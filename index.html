@@ -4,37 +4,69 @@
     <meta charset="UTF-8">
     <title>SLER - Privado</title>
     <style>
-        body { font-family: monospace; background: #eee; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #login { position: fixed; inset: 0; background: #fff; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #chat { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; background: #fff; border: 1px solid #000; }
-        .msg { background: #f0f0f0; padding: 8px; border-left: 4px solid #000; max-width: 85%; }
-        .sler-m { font-weight: bold; color: #000; }
-        .sler-c { font-style: italic; color: #444; }
-        .footer { padding: 10px; background: #ddd; border-top: 1px solid #000; }
-        input, textarea { width: 100%; padding: 8px; margin-bottom: 5px; box-sizing: border-box; }
+        body { font-family: monospace; background: #e5e5e5; margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
+        
+        /* Contenedor estrecho conservando la estética vertical */
+        #wrapper { width: 380px; background: white; border-left: 2px solid #000; border-right: 2px solid #000; display: flex; flex-direction: column; position: relative; }
+        
+        /* LOGIN PERSONALIZADO */
+        #login { position: absolute; inset: 0; background: #fff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        #login h2 { font-size: 18px; margin-bottom: 20px; border-bottom: 2px solid #000; }
+        
+        /* ÁREA DE CHAT */
+        #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; background: #fff; }
+        .msg { background: #fdfdfd; border-left: 5px solid #000; padding: 10px; border-bottom: 1px solid #eee; width: fit-content; max-width: 90%; }
+        .nick-label { font-size: 9px; font-weight: bold; color: blue; margin-bottom: 4px; }
+        
+        /* SEMÁNTICA SLER M/C */
+        .sler-m { color: #000; font-weight: bold; }
+        .sler-c { color: #000; font-weight: bold; }
+        .line-break { display: block; margin-bottom: 1px; }
+
+        /* SECCIÓN DE NICKS (Contactos) */
+        #contacts-bar { background: #000; color: #fff; padding: 8px; font-size: 10px; display: flex; gap: 10px; overflow-x: auto; white-space: nowrap; }
+        .contact-item { cursor: pointer; padding: 2px 8px; border: 1px solid #444; }
+        .contact-item.active { background: #0000ff; border-color: #fff; }
+
+        /* ÁREA DE ENTRADA */
+        .input-area { padding: 15px; background: #eee; border-top: 2px solid #000; }
+        #target-display { font-size: 10px; color: #666; margin-bottom: 5px; font-weight: bold; }
+        textarea { width: 100%; height: 60px; font-family: monospace; font-size: 14px; box-sizing: border-box; resize: none; border: 1px solid #000; padding: 8px; }
+        button { width: 100%; padding: 10px; background: #000; color: #fff; cursor: pointer; font-weight: bold; border: none; margin-top: 5px; }
+        
+        input { padding: 10px; margin-bottom: 10px; border: 1px solid #000; text-align: center; width: 80%; }
     </style>
 </head>
 <body>
 
-    <div id="login">
-        <h3>INGRESO SLER</h3>
-        <input type="text" id="miNick" placeholder="TU NOMBRE">
-        <button onclick="entrar()" style="padding:10px 20px;">ENTRAR</button>
-    </div>
+    <div id="wrapper">
+        <div id="login">
+            <h2>CHAT SLER INGRESA</h2>
+            <p style="font-size: 11px;">Ingresa tu nick para comenzar</p>
+            <input type="text" id="miNick" placeholder="TU NICK">
+            <button onclick="acceder()">ENTRAR</button>
+        </div>
 
-    <div id="chat"></div>
+        <div id="contacts-bar">
+            <span>PARA:</span>
+            <div id="user-list" style="display: flex; gap: 5px;">
+                </div>
+        </div>
 
-    <div class="footer">
-        <input type="text" id="paraNick" placeholder="ENVIAR A... (Nick del amigo)">
-        <textarea id="texto" placeholder="Escribe aquí..."></textarea>
-        <button onclick="enviar()" style="width:100%; padding:10px; background:#000; color:#fff;">ENVIAR PRIVADO</button>
+        <div id="chat-container"></div>
+
+        <div class="input-area">
+            <div id="target-display">DESTINATARIO: (Selecciona arriba)</div>
+            <textarea id="texto" placeholder="Escribe aquí..."></textarea>
+            <button id="btn-enviar">ENVIAR (SLER PRIVADO)</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        const firebaseConfig = {
+        var firebaseConfig = {
             apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
             authDomain: "sler-chat-lab.firebaseapp.com",
             databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
@@ -44,47 +76,55 @@
             appId: "1:594954603335:web:d332aa211e8ecce5521a62"
         };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        let user = "";
+        var db = firebase.database();
+        
+        var nickLogueado = "";
+        var nickDestino = "";
 
-        function entrar() {
-            user = document.getElementById('miNick').value.trim();
-            if(user) document.getElementById('login').style.display = 'none';
+        function acceder() {
+            nickLogueado = document.getElementById('miNick').value.trim();
+            if (nickLogueado !== "") {
+                document.getElementById('login').style.display = 'none';
+                iniciarEscucha();
+            }
         }
 
-        // MOTOR SLER: Fragmenta palabras largas (>5) en M y C [cite: 2026-01-23]
-        function procesar(t) {
-            return t.split(" ").map(w => {
-                if(w.length > 5) {
-                    let m = Math.ceil(w.length / 2);
-                    return `<span class="sler-m">${w.substring(0,m)}-</span><br><span class="sler-c">-${w.substring(m)}</span>`;
+        // MOTOR SLER M/C
+        function procesarSLER(texto) {
+            return texto.split(" ").map(word => {
+                if (word.length > 5) {
+                    let mid = Math.ceil(word.length / 2);
+                    return `<span class="sler-m">${word.substring(0, mid)}-</span><span class="line-break"></span><span class="sler-c">-${word.substring(mid)}</span>`;
                 }
-                return w;
+                return word;
             }).join(" ");
         }
 
-        function enviar() {
-            let msj = document.getElementById('texto').value.trim();
-            let destino = document.getElementById('paraNick').value.trim();
-            if(msj && destino) {
-                db.ref('mensajes').push({ de: user, para: destino, txt: msj });
-                document.getElementById('texto').value = "";
-            } else { alert("Falta mensaje o destinatario"); }
+        function seleccionarContacto(nick, el) {
+            nickDestino = nick;
+            document.getElementById('target-display').innerText = "DESTINATARIO: " + nick;
+            document.querySelectorAll('.contact-item').forEach(i => i.classList.remove('active'));
+            el.classList.add('active');
         }
 
-        db.ref('mensajes').on('child_added', snap => {
-            let d = snap.val();
-            // FILTRO DE PRIVACIDAD: Solo si soy yo o es para mí
-            if(d.para === user || d.de === user) {
-                let div = document.createElement('div');
-                div.className = 'msg';
-                div.style.alignSelf = (d.de === user) ? 'flex-end' : 'flex-start';
-                div.innerHTML = `<div style="font-size:9px; color:blue;">${d.de} > ${d.para}</div>` +
-                                `<div style="font-size:16px;">${procesar(d.txt)}</div>`;
-                document.getElementById('chat').appendChild(div);
-                document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+        document.getElementById('btn-enviar').onclick = function() {
+            var msj = document.getElementById('texto').value.trim();
+            if (msj !== "" && nickDestino !== "") {
+                db.ref('mensajes').push({
+                    remitente: nickLogueado,
+                    destinatario: nickDestino,
+                    contenido: msj,
+                    timestamp: Date.now()
+                });
+                document.getElementById('texto').value = "";
+            } else if (nickDestino === "") {
+                alert("Selecciona a quién enviarle el mensaje en la barra superior.");
             }
-        });
-    </script>
-</body>
-</html>
+        };
+
+        function iniciarEscucha() {
+            db.ref('mensajes').on('child_added', function(snap) {
+                var m = snap.val();
+                
+                // Actualizar barra de nicks (Contactos detectados)
+                if (!document.getElementById('c
