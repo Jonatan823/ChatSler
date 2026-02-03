@@ -12,22 +12,26 @@
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* INTERFAZ DE LOGIN RESTAURADA */
+        /* INTERFAZ DE LOGIN */
         #login-screen { position: absolute; inset: 0; background: #fff; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
         .login-box { width: 450px; text-align: center; }
         .login-box h2 { text-decoration: underline; margin-bottom: 30px; letter-spacing: 2px; }
-        .login-box input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-weight: bold; font-size: 18px; }
+        .login-box input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-size: 18px; }
 
-        /* PANEL CENTRAL Y SLER UNIFICADO */
+        /* PANEL CENTRAL Y SLER: PESO NORMAL */
         .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
         #practice-board { flex: 1; overflow-y: auto; padding: 35px; background: #fff; }
         #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
-        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; font-weight: bold; padding: 10px; resize: none; }
+        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
 
-        /* COMPONENTES SLER IDENTICOS A TEXTO NORMAL */
+        /* UNIFICACIÓN SIN NEGRITA */
         .sler-line, .texto-normal-box { 
-            width: 600px; margin: 0 auto 30px; 
-            font-family: 'Courier New', monospace; font-size: 19px; font-weight: bold; color: #000; 
+            width: 600px; 
+            margin: 0 auto 30px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 19px; 
+            font-weight: normal; /* PESO NORMAL COMO PEDISTE */
+            color: #000; 
         }
         .sler-line { display: flex; flex-wrap: wrap; column-gap: 10px; row-gap: 18px; }
         .word-unit { display: inline-flex; flex-direction: column; }
@@ -67,7 +71,7 @@
         <div class="practice-header">ESCRITORIO PERSONAL - PRÁCTICA 60 CH</div>
         <div id="practice-board"></div>
         <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe para practicar el sistema SLER..."></textarea>
+            <textarea id="main-input" placeholder="Escribe para practicar..."></textarea>
             <div style="display:flex; gap:10px; margin-top:5px;">
                 <button class="nav-btn" onclick="procesar('sler')">PROCESAR SLER</button>
                 <button class="nav-btn" onclick="procesar('normal')">TEXTO NORMAL</button>
@@ -90,11 +94,10 @@
             if(nick && pass) {
                 document.getElementById('login-screen').style.display = 'none';
             } else {
-                alert("Ingresa Nick y Contraseña para continuar");
+                alert("Ingresa Nick y Contraseña.");
             }
         }
 
-        /* ALGORITMO MONOCELDA TIPO PLUGIN */
         function motorSLER(texto) {
             const MOLDE = 60;
             let masa = texto.replace(/\s+/g, ' ').trim();
