@@ -4,65 +4,40 @@
     <meta charset="UTF-8">
     <title>SLER - Escritorio Personal 2026</title>
     <style>
-        /* RESET Y BASE */
         * { box-sizing: border-box; }
-        body { 
-            font-family: 'Courier New', Courier, monospace; 
-            background: #c0c0c0; 
-            margin: 0; 
-            height: 100vh; 
-            display: flex; 
-            overflow: hidden; 
-        }
+        body { font-family: 'Courier New', Courier, monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
         
         /* ESTRUCTURA TRIPARTITA */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* PANTALLA DE ACCESO (LOCAL) */
+        /* INTERFAZ DE LOGIN (Captura 1276) */
         #login-screen { position: absolute; inset: 0; background: #fff; z-index: 9000; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
-        .login-box { width: 350px; text-align: center; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 8px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-weight: bold; }
+        .login-box { width: 450px; text-align: center; }
+        .login-box h2 { text-decoration: underline; margin-bottom: 30px; letter-spacing: 2px; }
+        .login-box input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-weight: bold; font-size: 18px; }
 
-        /* CABECERAS */
+        /* PANEL CENTRAL Y SLER */
         .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
-        #practice-board { flex: 1; overflow-y: auto; padding: 40px; background: #fff; }
+        #practice-board { flex: 1; overflow-y: auto; padding: 35px; background: #fff; }
         #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
-        
-        textarea { 
-            width: 100%; height: 80px; border: 2px solid #000; 
-            font-family: 'Courier New', monospace; font-size: 18px; 
-            font-weight: bold; padding: 10px; resize: none; 
-        }
+        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; font-weight: bold; padding: 10px; resize: none; }
 
-        /* UNIFICACIÓN VISUAL SLER Y NORMAL */
+        /* COMPONENTES SLER UNIFICADOS CON TEXTO NORMAL */
         .sler-line, .texto-normal-box { 
-            width: 600px; 
-            margin: 0 auto 35px; 
-            font-family: 'Courier New', Courier, monospace; 
-            font-size: 19px; /* Tamaño idéntico para ambos */
-            font-weight: bold; 
-            color: #000; 
+            width: 600px; margin: 0 auto 30px; 
+            font-family: 'Courier New', monospace; font-size: 19px; font-weight: bold; color: #000; 
         }
+        .sler-line { display: flex; flex-wrap: wrap; column-gap: 10px; row-gap: 18px; }
+        .word-unit { display: inline-flex; flex-direction: column; }
+        .m-part { align-self: flex-start; text-align: left; line-height: 0.9; }
+        .c-part { align-self: flex-end; text-align: right; line-height: 0.9; }
+        .sler-simple { align-self: center; }
+        .texto-normal-box { border-left: 4px solid #000; padding-left: 20px; line-height: 1.4; }
 
-        .sler-line { display: flex; flex-wrap: wrap; column-gap: 10px; row-gap: 18px; justify-content: flex-start; }
-        .word-unit { display: inline-flex; flex-direction: column; vertical-align: top; }
-        
-        /* MONOCELDA SIN SUBRAYADOS NI COLORES */
-        .m-part { align-self: flex-start; text-align: left; line-height: 0.9; border: none !important; }
-        .c-part { align-self: flex-end; text-align: right; line-height: 0.9; border: none !important; }
-        .sler-simple { align-self: center; line-height: 1; }
-
-        /* TEXTO NORMAL RESPETANDO EL MISMO ESTILO */
-        .texto-normal-box { border-left: 4px solid #000; padding-left: 20px; line-height: 1.4; text-align: justify; }
-
-        /* BOTONES */
-        .nav-btn { 
-            width: 100%; padding: 12px 5px; background: #fff; border: 2px solid #000; 
-            cursor: pointer; font-family: 'Courier New', monospace; font-weight: bold; 
-            font-size: 11px; text-transform: uppercase; 
-        }
+        /* BOTONERA */
+        .nav-btn { width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; }
         .nav-btn:hover { background: #000; color: #fff; }
     </style>
 </head>
@@ -70,26 +45,28 @@
 
     <div id="login-screen">
         <div class="login-box">
-            <h2 style="text-decoration: underline;">SLER - ESCRITORIO PERSONAL</h2>
-            <input type="text" id="nick" placeholder="NICK / USUARIO">
-            <input type="email" id="mail" placeholder="EMAIL">
-            <button class="nav-btn" style="background: #000; color: #fff; font-size: 14px;" onclick="accesoLocal()">ENTRAR A PRACTICAR</button>
+            <h2><u>SLER - ESCRITORIO PERSONAL</u></h2>
+            <input type="text" id="nick" placeholder="jona">
+            <input type="email" id="mail" placeholder="jona@">
+            <button class="nav-btn" style="background: #000; color: #fff;" onclick="acceder()">ENTRAR A PRACTICAR</button>
         </div>
     </div>
 
     <div id="sidebar-left">
-        <div class="practice-header">HISTORIAL LOCAL</div>
-        <div id="users-list" style="flex:1; padding:10px; font-size: 12px;">
-            * Modo Personal Activo
+        <div class="practice-header">CONTACTOS</div>
+        <div id="users-list" style="flex:1; padding:10px;">
+            <div class="nav-btn" style="margin-bottom:5px;">MARCOS</div>
+            <div class="nav-btn" style="margin-bottom:5px;">PEPE</div>
+            <div class="nav-btn" style="margin-bottom:5px;">LUCIA</div>
         </div>
-        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
+        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR (LOGIN)</button>
     </div>
 
     <div id="main-practice">
         <div class="practice-header">ESCRITORIO PERSONAL - PRÁCTICA 60 CH</div>
         <div id="practice-board"></div>
         <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe aquí tu texto para aplanar..."></textarea>
+            <textarea id="main-input" placeholder="Escribe para practicar el sistema SLER..."></textarea>
             <div style="display:flex; gap:10px; margin-top:5px;">
                 <button class="nav-btn" onclick="procesar('sler')">PROCESAR SLER</button>
                 <button class="nav-btn" onclick="procesar('normal')">TEXTO NORMAL</button>
@@ -98,16 +75,73 @@
     </div>
 
     <div id="sidebar-right">
-        <div style="font-weight:bold; font-size:12px; margin-bottom:5px;">HERRAMIENTAS:</div>
+        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">HERRAMIENTAS:</div>
         <button class="nav-btn">INGRESAR AL TEST</button>
         <button class="nav-btn">PÁGINA PRINCIPAL</button>
         <button class="nav-btn">¿QUÉ ES SLER?</button>
-        <button class="nav-btn" onclick="alert('Función para próxima versión con DB')">INVITAR CONTACTOS</button>
+        <button class="nav-btn">INVITAR CONTACTOS</button>
     </div>
 
     <script>
-        // Función de acceso inmediato
-        function accesoLocal() {
-            let n = document.getElementById('nick').value;
-            if(n) {
-                document.getElementById
+        // Simulación de Firebase para evitar bloqueo (Captura 1275)
+        function acceder() {
+            const nick = document.getElementById('nick').value;
+            if(nick) {
+                document.getElementById('login-screen').style.display = 'none';
+                console.log("Modo local activo para: " + nick);
+            } else {
+                alert("Ingresa un nick para continuar");
+            }
+        }
+
+        function motorSLER(texto) {
+            const MOLDE = 60;
+            let masa = texto.replace(/\s+/g, ' ').trim();
+            let palabras = masa.split(" ");
+            let lineasHtml = "";
+            let grupo = [];
+            let cuenta = 0;
+
+            palabras.forEach(w => {
+                if (cuenta + w.length > MOLDE) {
+                    lineasHtml += renderFila(grupo);
+                    grupo = []; cuenta = 0;
+                }
+                grupo.push(w);
+                cuenta += w.length + 1;
+            });
+            lineasHtml += renderFila(grupo);
+            return lineasHtml;
+        }
+
+        function renderFila(palabras) {
+            if (!palabras.length) return "";
+            let html = palabras.map(w => {
+                if (w.length > 3) {
+                    let p = Math.ceil(w.length / 2);
+                    return `<div class="word-unit">
+                                <div class="m-part">${w.substring(0, p)}-</div>
+                                <div class="c-part">-${w.substring(p)}</div>
+                            </div>`;
+                }
+                return `<span class="sler-simple">${w}</span>`;
+            }).join(" ");
+            return `<div class="sler-line">${html}</div>`;
+        }
+
+        function procesar(modo) {
+            let input = document.getElementById('main-input');
+            let board = document.getElementById('practice-board');
+            if(!input.value) return;
+
+            if(modo === 'sler') {
+                board.innerHTML += motorSLER(input.value);
+            } else {
+                board.innerHTML += `<div class="texto-normal-box">${input.value}</div>`;
+            }
+            input.value = "";
+            board.scrollTop = board.scrollHeight;
+        }
+    </script>
+</body>
+</html>
