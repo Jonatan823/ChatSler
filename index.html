@@ -1,176 +1,19 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Chat Sler</title>
-    <style>
-        body { font-family: monospace; background: #e5e5e5; margin: 0; display: flex; justify-content: center; height: 100vh; overflow: hidden; }
-        #wrapper { width: 380px; background: white; border-left: 3px solid #000; border-right: 3px solid #000; display: flex; flex-direction: column; position: relative; }
-        
-        /* ACCESO */
-        #login { position: absolute; inset: 0; background: #fff; z-index: 1000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        #login h2 { font-size: 20px; text-decoration: underline; margin-bottom: 20px; }
-        
-        /* DIRECTORIO DE NICKS (PERSISTENTE) */
-        #barra-nicks { background: #000; color: #fff; padding: 10px; font-size: 11px; }
-        #lista-usuarios { display: flex; gap: 8px; overflow-x: auto; margin-top: 5px; min-height: 25px; }
-        .usuario-item { cursor: pointer; padding: 4px 10px; border: 1px solid #555; background: #222; white-space: nowrap; }
-        .usuario-item:hover { background: #444; }
+function motorSLER(texto) {
+    return texto.split(" ").map(palabra => {
+        // Solo procesamos palabras largas para evitar romper el ritmo
+        if (palabra.length > 5) {
+            let mitad = Math.ceil(palabra.length / 2);
+            let parte1 = palabra.substring(0, mitad);
+            let parte2 = palabra.substring(mitad);
 
-        /* AREA DE MENSAJES */
-        #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
-        .msg { background: #f9f9f9; border-left: 5px solid #000; padding: 8px; max-width: 85%; align-self: flex-start; }
-        .sler-m { font-weight: bold; }
-        .sler-c { font-weight: bold; }
-
-        /* VENTANA EMERGENTE */
-        #modal-envio { display: none; position: absolute; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
-        .modal-content { background: white; padding: 20px; width: 100%; border: 2px solid #000; }
-        textarea { width: 100%; height: 100px; font-family: monospace; resize: none; border: 1px solid #000; padding: 10px; box-sizing: border-box; margin-top: 10px; }
-        .btn-negro { width: 100%; padding: 12px; background: #000; color: #fff; cursor: pointer; font-weight: bold; border: none; margin-top: 10px; }
-        input { padding: 10px; margin-bottom: 8px; border: 1px solid #000; text-align: center; width: 85%; }
-    </style>
-</head>
-<body>
-
-    <div id="wrapper">
-        <div id="login">
-            <h2>Chat Sler</h2>
-            <p style="font-size: 10px;">Ingresa tus datos para continuar</p>
-            <input type="text" id="regNick" placeholder="NICK">
-            <input type="password" id="regPass" placeholder="CONTRASEÑA">
-            <input type="text" id="regEmail" placeholder="EMAIL (debe contener @)">
-            <button class="btn-negro" onclick="gestionarAcceso()">INGRESAR</button>
-            <p id="error-login" style="color:red; font-size:10px; margin-top:10px;"></p>
-        </div>
-
-        <div id="barra-nicks">
-            <span>ENVIAR PRIVADO A:</span>
-            <div id="lista-usuarios"></div>
-        </div>
-
-        <div id="chat-container"></div>
-
-        <div id="modal-envio">
-            <div class="modal-content">
-                <h3 id="titulo-destino">Para: </h3>
-                <textarea id="texto-sler" placeholder="Escribe tu mensaje Sler..."></textarea>
-                <button class="btn-negro" onclick="enviarMensaje()">ENVIAR MENSAJE</button>
-                <button class="btn-negro" style="background:#fff; color:#000; border:1px solid #000" onclick="cerrarModal()">CANCELAR</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
-            authDomain: "sler-chat-lab.firebaseapp.com",
-            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
-            projectId: "sler-chat-lab",
-            storageBucket: "sler-chat-lab.firebasestorage.app",
-            messagingSenderId: "594954603335",
-            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
-        };
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.database();
-        var nickLogueado = "";
-        var nickDestino = "";
-
-        function gestionarAcceso() {
-            var nick = document.getElementById('regNick').value.trim();
-            var pass = document.getElementById('regPass').value.trim();
-            var email = document.getElementById('regEmail').value.trim();
-            var error = document.getElementById('error-login');
-
-            if (!nick || !pass) { error.innerText = "Faltan datos."; return; }
-
-            db.ref('perfiles/' + nick).once('value', snap => {
-                if (snap.exists()) {
-                    if (snap.val().pass === pass) { entrar(nick); } 
-                    else { error.innerText = "Contraseña incorrecta."; }
-                } else {
-                    if (!email.includes("@")) { error.innerText = "Email inválido."; return; }
-                    db.ref('perfiles/' + nick).set({ pass: pass, email: email, registrado: true }).then(() => entrar(nick));
-                }
-            });
+            // Estructura Zig-Zag: 
+            // Línea M (Impar): Guion al final para inducir completitud.
+            // Línea C (Par): Guion al inicio para advertir inconclusividad.
+            return `<div class="sler-container">
+                        <div class="sler-m">${parte1}-</div>
+                        <div class="sler-c">-${parte2}</div>
+                    </div>`;
         }
-
-        function entrar(nick) {
-            nickLogueado = nick;
-            document.getElementById('login').style.display = 'none';
-            cargarDirectorio();
-            escucharMensajes();
-        }
-
-        // CARGA TODOS LOS NICKS REGISTRADOS (ASINCRÓNICO)
-        function cargarDirectorio() {
-            db.ref('perfiles').on('value', snap => {
-                const list = document.getElementById('lista-usuarios');
-                list.innerHTML = "";
-                snap.forEach(userSnap => {
-                    let u = userSnap.key;
-                    if(u !== nickLogueado) {
-                        let el = document.createElement('div');
-                        el.className = 'usuario-item';
-                        el.innerText = u;
-                        el.onclick = () => {
-                            nickDestino = u;
-                            document.getElementById('titulo-destino').innerText = "Para: " + u;
-                            document.getElementById('modal-envio').style.display = 'flex';
-                        };
-                        list.appendChild(el);
-                    }
-                });
-            });
-        }
-
-        function motorSLER(texto) {
-            return texto.split(" ").map(w => {
-                if (w.length > 5) {
-                    let m = Math.ceil(w.length / 2);
-                    return `<span class="sler-m">${w.substring(0, m)}-</span><br><span class="sler-c">-${w.substring(m)}</span>`;
-                }
-                return w;
-            }).join(" ");
-        }
-
-        function enviarMensaje() {
-            var msj = document.getElementById('texto-sler').value.trim();
-            if (msj !== "") {
-                db.ref('mensajes').push({
-                    de: nickLogueado,
-                    para: nickDestino,
-                    txt: msj,
-                    timestamp: Date.now()
-                });
-                cerrarModal();
-            }
-        }
-
-        function escucharMensajes() {
-            // Carga mensajes de las últimas 24 horas
-            var hace24hs = Date.now() - (24 * 60 * 60 * 1000);
-            db.ref('mensajes').orderByChild('timestamp').startAt(hace24hs).on('child_added', snap => {
-                var d = snap.val();
-                if (d.para === nickLogueado || d.de === nickLogueado) {
-                    var div = document.createElement('div');
-                    div.className = 'msg';
-                    div.style.alignSelf = (d.de === nickLogueado) ? 'flex-end' : 'flex-start';
-                    div.innerHTML = `<div style="font-size:9px; color:blue;">${d.de}</div>` + 
-                                  `<div style="font-size:16px;">${motorSLER(d.txt)}</div>`;
-                    document.getElementById('chat-container').appendChild(div);
-                    document.getElementById('chat-container').scrollTop = document.getElementById('chat-container').scrollHeight;
-                }
-            });
-        }
-
-        function cerrarModal() {
-            document.getElementById('modal-envio').style.display = 'none';
-            document.getElementById('texto-sler').value = "";
-        }
-    </script>
-</body>
-</html>
+        return `<div class="sler-simple">${palabra}</div>`;
+    }).join("");
+}
