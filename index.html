@@ -24,15 +24,7 @@
         textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 16px; padding: 10px; resize: none; }
 
         /* COMPONENTES SLER: LÓGICA DE MONOCELDA ISOMÉTRICA */
-        .sler-line { 
-            width: 600px; 
-            margin: 0 auto 20px; 
-            display: flex; 
-            flex-wrap: wrap; 
-            column-gap: 5px; 
-            row-gap: 12px;
-            color: #000; 
-        }
+        .sler-line { width: 600px; margin: 0 auto 20px; display: flex; flex-wrap: wrap; column-gap: 5px; row-gap: 12px; color: #000; }
         .word-unit { display: inline-flex; flex-direction: column; padding: 0 2px; }
         .m-part { align-self: flex-start; font-weight: bold; font-size: 18px; border: none !important; line-height: 0.9; color: #000; text-align: left; }
         .c-part { align-self: flex-end; font-weight: bold; font-size: 18px; border: none !important; line-height: 0.9; color: #000; text-align: right; }
@@ -42,9 +34,8 @@
         .nav-btn { width: 100%; padding: 12px 5px; background: #fff; border: 2px solid #000; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; }
         .nav-btn:hover { background: #000; color: #fff; }
 
-        /* MODAL PRIVADO */
+        /* PRIVADO */
         #private-modal { display: none; position: fixed; right: 210px; bottom: 120px; width: 320px; background: white; border: 4px solid #000; z-index: 5000; box-shadow: 5px 5px 0 #000; }
-        .private-header { background: #000; color: white; padding: 5px; font-size: 12px; display: flex; justify-content: space-between; }
     </style>
 </head>
 <body>
@@ -86,7 +77,9 @@
     </div>
 
     <div id="private-modal">
-        <div class="private-header"><span id="dest-name">Para: </span><span onclick="cerrarPrivado()" style="cursor:pointer">[X]</span></div>
+        <div style="background:#000; color:#fff; padding:5px; font-size:12px; display:flex; justify-content:space-between;">
+            <span id="dest-name">Para: </span><span onclick="cerrarPrivado()" style="cursor:pointer">[X]</span>
+        </div>
         <div style="padding:10px">
             <textarea id="priv-input" style="height:60px" placeholder="Mensaje privado..."></textarea>
             <button class="nav-btn" style="margin-top:5px" onclick="enviarPrivado()">ENVIAR</button>
@@ -97,24 +90,37 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // Configuración básica para inicializar
-        var firebaseConfig = { databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com" };
+        // CONFIGURACIÓN REAL RESTAURADA
+        var firebaseConfig = {
+            apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
+            authDomain: "sler-chat-lab.firebaseapp.com",
+            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
+            projectId: "sler-chat-lab",
+            storageBucket: "sler-chat-lab.firebasestorage.app",
+            messagingSenderId: "594954603335",
+            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
+        };
         firebase.initializeApp(firebaseConfig);
         var db = firebase.database();
         var miNick = "";
 
         function acceder() {
-            miNick = document.getElementById('nick').value;
-            let email = document.getElementById('mail').value;
-            if(miNick && email.includes('@')) {
-                document.getElementById('login-screen').style.display = 'none';
-                cargarContactos();
+            miNick = document.getElementById('nick').value.trim();
+            let email = document.getElementById('mail').value.trim();
+            let clave = document.getElementById('pass').value.trim();
+            
+            if(miNick && email.includes('@') && clave) {
+                // Registrar o entrar
+                db.ref('perfiles/' + miNick).set({ email: email, pass: clave, online: true })
+                .then(() => {
+                    document.getElementById('login-screen').style.display = 'none';
+                    cargarContactos();
+                });
             } else {
-                alert("Completa los datos correctamente.");
+                alert("Por favor, completa Nick, Clave y Email con @");
             }
         }
 
-        /* ALGORITMO DE APLANADO MATRICIAL */
         function motorSLER_Personal(texto) {
             const MOLDE = 60;
             let masa = texto.replace(/\s+/g, ' ').trim();
@@ -138,6 +144,41 @@
                 let contenido = linea.map(w => {
                     if (w.length > 3) {
                         let p = Math.ceil(w.length / 2);
-                        return `<div class="word-unit">
-                                    <div class="m-part">${w.substring(0, p)}-</div>
-                                    <div class="c-part">-${w.substring(p
+                        return `<div class="word-unit"><div class="m-part">${w.substring(0, p)}-</div><div class="c-part">-${w.substring(p)}</div></div>`;
+                    }
+                    return `<span class="sler-simple">${w}</span>`;
+                }).join(" ");
+                return `<div class="sler-line">${contenido}</div>`;
+            }).join("");
+        }
+
+        function procesarPractica(modo) {
+            let t = document.getElementById('main-input').value;
+            let board = document.getElementById('practice-board');
+            if(!t) return;
+            if(modo === 'sler') board.innerHTML += motorSLER_Personal(t);
+            else board.innerHTML += `<div style="width:600px; margin:15px auto; font-weight:bold; border-left:3px solid #000; padding-left:10px;">${t}</div>`;
+            document.getElementById('main-input').value = "";
+            board.scrollTop = board.scrollHeight;
+        }
+
+        function cargarContactos() {
+            db.ref('perfiles').on('value', snap => {
+                let list = document.getElementById('users-list');
+                list.innerHTML = "";
+                snap.forEach(u => {
+                    if(u.key !== miNick) {
+                        let d = document.createElement('div');
+                        d.className = 'nav-btn'; d.style.marginBottom='5px';
+                        d.innerText = u.key;
+                        d.onclick = () => { 
+                            document.getElementById('private-modal').style.display='block'; 
+                            document.getElementById('dest-name').innerText="Para: "+u.key; 
+                        };
+                        list.appendChild(d);
+                    }
+                });
+            });
+        }
+
+        function cerrarPrivado() { document.getElementById('private-modal').style.display='none'; }
