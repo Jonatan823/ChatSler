@@ -2,10 +2,10 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CHAT SLER - 2026</title>
+    <title>CHAT SLER - Escritorio Personal 2026</title>
     <style>
         * { box-sizing: border-box; }
-        /* El body siempre debe ser visible */
+        
         body { 
             font-family: 'Courier New', Courier, monospace; 
             background: #c0c0c0; 
@@ -14,37 +14,73 @@
             display: flex; 
             overflow: hidden; 
         }
-        
-        /* LOGIN RESTAURADO (Captura 1276) */
+
+        /* LOGIN SCREEN - PRIORIDAD MÁXIMA */
         #login-screen { 
-            position: fixed; inset: 0; background: #fff; z-index: 9999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
+            position: fixed; 
+            inset: 0; 
+            background: #fff; 
+            z-index: 9999; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            border: 5px solid #000; 
         }
         .login-box { width: 450px; text-align: center; }
         .login-box h2 { text-decoration: underline; margin-bottom: 30px; letter-spacing: 2px; }
-        .login-box input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-size: 18px; font-weight: normal; }
+        .login-box input { 
+            width: 100%; padding: 15px; margin-bottom: 12px; 
+            border: 2px solid #000; font-family: 'Courier New'; 
+            text-align: center; font-size: 18px; 
+        }
 
-        /* ESTRUCTURA DEL CHAT */
+        /* ESTRUCTURA DEL ESCRITORIO */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-        /* ESTILOS DE LECTURA (Unificados y sin negrita) */
         .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
+        
+        /* ÁREA DE TRABAJO */
         #practice-board { flex: 1; overflow-y: auto; padding: 35px; background: #fff; }
         #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
-        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
-
-        .sler-line, .texto-normal-box { 
-            width: 600px; margin: 0 auto 30px; 
-            font-family: 'Courier New', monospace; font-size: 19px; font-weight: normal; color: #000; 
+        textarea { 
+            width: 100%; height: 80px; border: 2px solid #000; 
+            font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; 
         }
-        .sler-line { display: flex; flex-wrap: wrap; column-gap: 10px; row-gap: 18px; }
-        .word-unit { display: inline-flex; flex-direction: column; }
-        .m-part, .c-part { line-height: 0.9; }
-        .texto-normal-box { border-left: 4px solid #000; padding-left: 20px; line-height: 1.4; }
 
-        .nav-btn { width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        /* MOTOR VISUAL SLER */
+        .sler-line { 
+            width: 600px; /* Molde de 60 caracteres aprox */
+            margin: 0 auto 40px; 
+            display: flex; 
+            flex-wrap: wrap; 
+            column-gap: 12px; 
+            row-gap: 20px; 
+            font-family: 'Courier New', monospace; 
+            font-size: 20px; 
+            font-weight: normal;
+        }
+
+        .word-unit { display: inline-flex; flex-direction: column; }
+        .m-part { align-self: flex-start; text-align: left; line-height: 0.8; color: #000; }
+        .c-part { align-self: flex-end; text-align: right; line-height: 0.8; color: #000; }
+        .sler-simple { align-self: center; line-height: 1; }
+
+        .texto-normal-box { 
+            width: 600px; margin: 0 auto 30px; 
+            border-left: 4px solid #000; padding-left: 20px; 
+            font-family: 'Courier New'; font-size: 19px; line-height: 1.4; 
+        }
+
+        /* BOTONERA */
+        .nav-btn { 
+            width: 100%; padding: 12px 5px; background: #fff; 
+            border: 2px solid #000; cursor: pointer; 
+            font-family: 'Courier New'; font-weight: bold; font-size: 12px; 
+            text-transform: uppercase; 
+        }
         .nav-btn:hover { background: #000; color: #fff; }
     </style>
 </head>
@@ -61,124 +97,3 @@
     </div>
 
     <div id="sidebar-left">
-        <div class="practice-header">CONTACTOS</div>
-        <div id="users-list" style="flex:1; padding:10px;"></div>
-        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
-    </div>
-
-    <div id="main-practice">
-        <div class="practice-header">ESCRITORIO PERSONAL - PRÁCTICA 60 CH</div>
-        <div id="practice-board"></div>
-        <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe para practicar..."></textarea>
-            <div style="display:flex; gap:10px; margin-top:5px;">
-                <button class="nav-btn" onclick="procesar('sler')">PROCESAR SLER</button>
-                <button class="nav-btn" onclick="procesar('normal')">TEXTO NORMAL</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="sidebar-right">
-        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">HERRAMIENTAS:</div>
-        <button class="nav-btn">INGRESAR AL TEST</button>
-        <button class="nav-btn">PÁGINA PRINCIPAL</button>
-        <button class="nav-btn">¿QUÉ ES SLER?</button>
-        <button class="nav-btn">INVITAR CONTACTOS</button>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <script>
-        // Configuración de tu base de datos
-        var firebaseConfig = {
-            apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
-            authDomain: "sler-chat-lab.firebaseapp.com",
-            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
-            projectId: "sler-chat-lab",
-            storageBucket: "sler-chat-lab.firebasestorage.app",
-            messagingSenderId: "594954603335",
-            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
-        };
-        
-        // Inicialización controlada
-        var db;
-        try {
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch(e) { console.error("Firebase no cargó:", e); }
-
-        function acceder() {
-            const nick = document.getElementById('nick').value.trim();
-            const pass = document.getElementById('pass').value.trim();
-            
-            if(nick && pass) {
-                // Quitamos el login del DOM para que no "tape" nada
-                const screen = document.getElementById('login-screen');
-                if(screen) screen.style.display = 'none';
-
-                // Intentamos registrar en Firebase en paralelo
-                if(db) {
-                    db.ref('perfiles/' + nick).update({
-                        pass: pass,
-                        online: true,
-                        mail: document.getElementById('mail').value
-                    });
-                    cargarContactos();
-                }
-            } else {
-                alert("Ingresa Nick y Contraseña.");
-            }
-        }
-
-        function motorSLER(texto) {
-            const MOLDE = 60;
-            let masa = texto.replace(/\r?\n|\r/g, " ").replace(/\s+/g, ' ').trim();
-            let palabras = masa.split(" ");
-            let lineasHtml = ""; let grupo = []; let cuenta = 0;
-
-            palabras.forEach(w => {
-                if (cuenta + w.length > MOLDE) {
-                    lineasHtml += renderFila(grupo);
-                    grupo = []; cuenta = 0;
-                }
-                grupo.push(w); cuenta += w.length + 1;
-            });
-            if(grupo.length > 0) lineasHtml += renderFila(grupo);
-            return lineasHtml;
-        }
-
-        function renderFila(palabras) {
-            let html = palabras.map(w => {
-                if (w.length > 3) {
-                    let p = Math.ceil(w.length / 2);
-                    return `<div class="word-unit"><div class="m-part">${w.substring(0, p)}-</div><div class="c-part">-${w.substring(p)}</div></div>`;
-                }
-                return `<span class="sler-simple">${w}</span>`;
-            }).join(" ");
-            return `<div class="sler-line">${html}</div>`;
-        }
-
-        function procesar(modo) {
-            let input = document.getElementById('main-input');
-            let board = document.getElementById('practice-board');
-            if(!input.value) return;
-            board.innerHTML += (modo === 'sler') ? motorSLER(input.value) : `<div class="texto-normal-box">${input.value}</div>`;
-            input.value = ""; board.scrollTop = board.scrollHeight;
-        }
-
-        function cargarContactos() {
-            if(!db) return;
-            db.ref('perfiles').on('value', snap => {
-                let list = document.getElementById('users-list');
-                list.innerHTML = "";
-                snap.forEach(c => {
-                    let b = document.createElement('div'); b.className = 'nav-btn';
-                    b.style.marginBottom = '5px'; b.innerText = c.key;
-                    list.appendChild(b);
-                });
-            });
-        }
-    </script>
-</body>
-</html>
