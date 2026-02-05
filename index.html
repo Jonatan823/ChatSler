@@ -51,7 +51,7 @@
         }
         .nav-btn:hover { background: #000; color: #fff; }
 
-        /* VENTANA PRIVADA ACTUALIZADA (3175) */
+        /* VENTANA PRIVADA */
         #chat-popup {
             position: fixed; bottom: 20px; right: 230px; width: 380px; height: 500px;
             background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000;
@@ -77,7 +77,7 @@
     <div id="sidebar-left">
         <div class="practice-header">CONTACTOS</div>
         <div id="users-list" style="flex:1; overflow-y: auto;"></div>
-        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR (LOGIN)</button>
+        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
     </div>
 
     <div id="main-practice">
@@ -86,25 +86,24 @@
         <div id="input-zone">
             <textarea id="main-input" placeholder="Escribe para practicar..."></textarea>
             <div style="display:flex; gap:10px; margin-top:5px;">
-                <button class="nav-btn" onclick="procesarEscritorio('sler')">PROCESAR SLER</button>
-                <button class="nav-btn" onclick="procesarEscritorio('normal')">TEXTO NORMAL</button>
+                <button class="nav-btn" onclick="procesarEscritorio('sler')">VISTA SLER</button>
+                <button class="nav-btn" onclick="procesarEscritorio('normal')">NORMAL</button>
             </div>
         </div>
     </div>
 
     <div id="sidebar-right">
-        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">HERRAMIENTAS:</div>
-        <button class="nav-btn">INGRESAR AL TEST</button>
-        <button class="nav-btn">PÁGINA PRINCIPAL</button>
-        <button class="nav-btn">¿QUÉ ES SLER?</button>
-        <button class="nav-btn">INVITAR CONTACTOS</button>
+        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">DATOS:</div>
+        <button class="nav-btn">TEST</button>
+        <button class="nav-btn">HOME</button>
+        <button class="nav-btn">AYUDA</button>
     </div>
 
     <div id="chat-popup">
-        <div class="practice-header" id="popup-title">CHAT CON: -</div>
+        <div class="practice-header" id="popup-title">CHAT PRIVADO</div>
         <div id="chat-popup-messages"></div>
         <div id="chat-popup-input">
-            <input type="text" id="priv-input" placeholder="Escribe aquí..." onkeydown="if(event.key==='Enter') enviarPrivado()">
+            <input type="text" id="priv-input" placeholder="Escribe..." onkeydown="if(event.key==='Enter') enviarPrivado()">
             <div class="btn-group-priv">
                 <button class="nav-btn" style="flex:2; background:#000; color:#fff;" onclick="enviarPrivado()">ENTER</button>
                 <button class="nav-btn" style="flex:1;" onclick="cerrarChat()">CERRAR</button>
@@ -132,12 +131,13 @@
 
         function acceder() {
             myNick = document.getElementById('nick').value.trim();
-            if(myNick) {
-                db.ref('usuarios/' + myNick).set({ nick: myNick, online: true });
+            const email = document.getElementById('mail').value.trim();
+            if(myNick && email) {
+                db.ref('usuarios/' + myNick).set({ nick: myNick, email: email, online: true });
                 document.getElementById('login-screen').style.display = 'none';
                 escucharContactos();
                 cal();
-            }
+            } else { alert("Ingresa Nick y Email"); }
         }
 
         function cal() {
@@ -174,9 +174,7 @@
             document.getElementById('chat-popup-messages').innerHTML = "";
             const chatId = [myNick, selectedNick].sort().join('_');
             db.ref('mensajes/' + chatId).off();
-            db.ref('mensajes/' + chatId).on('child_added', (snap) => {
-                renderizarPrivado(snap.val());
-            });
+            db.ref('mensajes/' + chatId).on('child_added', (snap) => { renderizarPrivado(snap.val()); });
         }
 
         function cerrarChat() { document.getElementById('chat-popup').style.display = 'none'; selectedNick = ""; }
@@ -185,7 +183,6 @@
             const container = document.getElementById('chat-popup-messages');
             const esMio = msg.emisor === myNick;
             const style = esMio ? "border-left: 3px solid #000; background:#f9f9f9;" : "border-right: 3px solid #000; background:#fff;";
-            // Ajustado a 28 caracteres según lo solicitado
             const bloque = ejecutarMotor(msg.texto, 28, true);
             container.innerHTML += `<div style="margin-bottom:15px; padding:8px; ${style}">${bloque}</div>`;
             container.scrollTop = container.scrollHeight;
@@ -210,16 +207,14 @@
             board.scrollTop = board.scrollHeight;
         }
 
-        function tratarSignos(palabra, inverso) {
-            if (!inverso) return palabra;
-            const inicioMatch = palabra.match(/^([¿¡]+)/);
-            const finMatch = palabra.match(/([.,;!?]+)$/);
-            let limpia = palabra;
-            let sApertura = inicioMatch ? inicioMatch[1] : "";
-            let sCierre = finMatch ? finMatch[1] : "";
-            if (sApertura) limpia = limpia.substring(sApertura.length);
-            if (sCierre) limpia = limpia.substring(0, limpia.length - sCierre.length);
-            return sCierre + limpia + sApertura;
+        function tratarSignos(p, inv) {
+            if (!inv) return p;
+            let a = p.match(/^([¿¡]+)/), c = p.match(/([.,;!?]+)$/);
+            let l = p;
+            let sA = a ? a[1] : "", sC = c ? c[1] : "";
+            if (sA) l = l.substring(sA.length);
+            if (sC) l = l.substring(0, l.length - sC.length);
+            return sC + l + sA;
         }
 
         function ejecutarMotor(texto, limite, esPrivado) {
@@ -230,4 +225,33 @@
             while (mazo.length > 0) {
                 let lin = "";
                 while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= limite) {
-                    lin += (lin ? " " : "") + mazo.
+                    lin += (lin ? " " : "") + mazo.shift();
+                }
+                
+                // Partición si la palabra es larga (6+) y queda espacio
+                let h = limite - lin.length;
+                if (mazo.length > 0 && h >= 3 && mazo[0].length >= 6) {
+                    let p = mazo[0], corte = h - 1;
+                    if (corte < 2) corte = 2;
+                    if (!par) { lin += (lin ? " " : "") + p.substring(0, corte) + "-"; }
+                    else { lin += (lin ? " " : "") + "-" + p.substring(0, corte); }
+                    mazo[0] = p.substring(corte);
+                }
+
+                lineCount++;
+                let puntitos = (esPrivado && lineCount % 4 === 0) ? "border-bottom: 1px dotted #999; margin-bottom: 4px;" : "";
+                
+                if (par) {
+                    let inv = lin.split(' ').map(w => tratarSignos(w, true)).reverse().join(' ');
+                    let pad = " ".repeat(Math.max(0, limite - inv.length));
+                    res += `<div class="${clase}" style="${puntitos}">${pad}${inv}</div>`;
+                } else {
+                    res += `<div class="${clase}" style="${puntitos}">${lin}</div>`;
+                }
+                par = !par;
+            }
+            return res;
+        }
+    </script>
+</body>
+</html>
