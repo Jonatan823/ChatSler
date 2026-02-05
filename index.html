@@ -11,6 +11,7 @@
             display: flex; overflow: hidden; 
         }
 
+        /* LOGIN */
         #login-screen { 
             position: fixed; inset: 0; background: #fff; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
@@ -22,24 +23,25 @@
             font-family: 'Courier New'; text-align: center; font-size: 18px; 
         }
 
+        /* ESTRUCTURA VISUAL FIEL A CAPTURA 3174 */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
-        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
+        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; text-transform: uppercase; }
         
         #practice-board { 
             flex: 1; overflow-y: auto; padding: 40px; background: #fff; 
             white-space: pre; font-size: 19px; line-height: 1.5;
         }
 
+        /* MOTOR SLER */
         .sler-line { color: #000; width: 100%; display: block; }
         .sler-privado-line { font-size: 15px; width: 100%; display: block; line-height: 1.2; white-space: pre; }
         .sler-privado-line:nth-child(4n) { border-bottom: 1px dotted #999; margin-bottom: 4px; }
 
-        .user-item { padding: 12px; border-bottom: 1px solid #000; cursor: pointer; font-weight: bold; background: #fff; }
+        .user-item { padding: 12px; border: 2px solid #000; cursor: pointer; font-weight: bold; background: #fff; margin: 5px; text-align: center; text-transform: uppercase; }
         .user-item:hover { background: #000; color: #fff; }
-        .user-selected { background: #000; color: #fff; }
 
         #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
         textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
@@ -49,6 +51,16 @@
             cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; 
         }
         .nav-btn:hover { background: #000; color: #fff; }
+
+        /* VENTANA EMERGENTE DE CHAT PRIVADO */
+        #chat-popup {
+            position: fixed; bottom: 20px; right: 230px; width: 350px; height: 450px;
+            background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
+        }
+        #chat-popup-messages { flex: 1; overflow-y: auto; padding: 10px; background: #fff; border-bottom: 2px solid #000; }
+        #chat-popup-input { padding: 10px; background: #eee; }
+        #chat-popup-input input { width: 100%; padding: 8px; border: 2px solid #000; font-family: 'Courier New'; }
     </style>
 </head>
 <body>
@@ -58,35 +70,46 @@
             <h2><u>CHAT SLER</u></h2>
             <input type="text" id="nick" placeholder="NICK">
             <input type="password" id="pass" placeholder="CONTRASEÑA">
-            <input type="email" id="mail" placeholder="EMAIL">
-            <button class="nav-btn" style="background: #000; color: #fff; font-size: 16px;" onclick="acceder()">ENTRAR</button>
+            <input type="email" id="mail" placeholder="EMAIL FICTICIO">
+            <button class="nav-btn" style="background: #000; color: #fff; font-size: 16px;" onclick="acceder()">ENTRAR AL SISTEMA</button>
         </div>
     </div>
 
     <div id="sidebar-left">
         <div class="practice-header">CONTACTOS</div>
-        <div id="users-list" style="flex:1; overflow-y: auto;"></div>
-        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
+        <div id="users-list" style="flex:1; overflow-y: auto; padding-top: 10px;"></div>
+        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR (LOGIN)</button>
     </div>
 
     <div id="main-practice">
-        <div class="practice-header" id="chat-title">ESCRITORIO PERSONAL</div>
+        <div class="practice-header">ESCRITORIO PERSONAL - PRÁCTICA 60 CH</div>
         <div id="practice-board"></div>
         <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe..."></textarea>
+            <textarea id="main-input" placeholder="Escribe para practicar el sistema SLER..."></textarea>
             <div style="display:flex; gap:10px; margin-top:5px;">
-                <button class="nav-btn" onclick="procesar('sler')">VISTA S.L.E.R.</button>
-                <button class="nav-btn" onclick="procesar('normal')">VISTA NORMAL</button>
+                <button class="nav-btn" onclick="procesarEscritorio('sler')">PROCESAR SLER</button>
+                <button class="nav-btn" onclick="procesarEscritorio('normal')">TEXTO NORMAL</button>
             </div>
         </div>
     </div>
 
     <div id="sidebar-right">
-        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">DATOS:</div>
-        <div style="font-size: 12px;">MAX CH: <span id="mChars">60</span></div>
+        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">HERRAMIENTAS:</div>
+        <div style="font-size: 11px;">MAX CH: <span id="mChars">60</span></div>
         <hr style="border:1px solid #000;">
-        <button class="nav-btn">TEST</button>
-        <button class="nav-btn">HOME</button>
+        <button class="nav-btn">INGRESAR AL TEST</button>
+        <button class="nav-btn">PÁGINA PRINCIPAL</button>
+        <button class="nav-btn">¿QUÉ ES SLER?</button>
+        <button class="nav-btn">INVITAR CONTACTOS</button>
+    </div>
+
+    <div id="chat-popup">
+        <div class="practice-header" id="popup-title" style="cursor: move;">CHAT: USUARIO</div>
+        <div id="chat-popup-messages"></div>
+        <div id="chat-popup-input">
+            <input type="text" id="priv-input" placeholder="Escribe y presiona Enter..." onkeydown="if(event.key==='Enter') enviarPrivado()">
+            <button class="nav-btn" style="margin-top:5px; padding:5px;" onclick="cerrarChat()">CERRAR VENTANA</button>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -136,47 +159,65 @@
                     const u = child.val();
                     if(u.nick !== myNick) {
                         const div = document.createElement('div');
-                        div.className = 'user-item' + (u.nick === selectedNick ? ' user-selected' : '');
+                        div.className = 'user-item';
                         div.innerText = u.nick;
-                        div.onclick = () => abrirChat(u.nick);
+                        div.onclick = () => abrirVentanaPrivada(u.nick);
                         list.appendChild(div);
                     }
                 });
             });
         }
 
-        function abrirChat(nick) {
+        function abrirVentanaPrivada(nick) {
             selectedNick = nick;
-            document.getElementById('chat-title').innerText = "PRIVADO CON: " + nick;
-            document.getElementById('practice-board').innerHTML = "";
+            document.getElementById('popup-title').innerText = "CHAT CON: " + nick;
+            document.getElementById('chat-popup').style.display = 'flex';
+            document.getElementById('chat-popup-messages').innerHTML = "";
+            
             const chatId = [myNick, selectedNick].sort().join('_');
             db.ref('mensajes/' + chatId).off();
             db.ref('mensajes/' + chatId).on('child_added', (snap) => {
-                renderizar(snap.val());
+                renderizarPrivado(snap.val());
             });
         }
 
-        function renderizar(msg) {
-            const board = document.getElementById('practice-board');
+        function cerrarChat() {
+            document.getElementById('chat-popup').style.display = 'none';
+            selectedNick = "";
+        }
+
+        function renderizarPrivado(msg) {
+            const container = document.getElementById('chat-popup-messages');
             const esMio = msg.emisor === myNick;
             const style = esMio ? "border-left: 3px solid #000; background:#f9f9f9;" : "border-right: 3px solid #000; background:#fff;";
             const bloque = ejecutarMotor(msg.texto, 25, true);
-            board.innerHTML += `<div style="margin-bottom:20px; padding:10px; ${style}">${bloque}</div>`;
-            board.scrollTop = board.scrollHeight;
+            container.innerHTML += `<div style="margin-bottom:15px; padding:8px; ${style}">${bloque}</div>`;
+            container.scrollTop = container.scrollHeight;
         }
 
-        function procesar(modo) {
+        function enviarPrivado() {
+            const input = document.getElementById('priv-input');
+            const txt = input.value.trim();
+            if(txt && selectedNick) {
+                const chatId = [myNick, selectedNick].sort().join('_');
+                db.ref('mensajes/' + chatId).push({ emisor: myNick, texto: txt });
+                input.value = "";
+            }
+        }
+
+        function procesarEscritorio(modo) {
             const input = document.getElementById('main-input');
+            const board = document.getElementById('practice-board');
             const txt = input.value.trim();
             if(!txt) return;
 
-            if(!selectedNick) {
-                document.getElementById('practice-board').innerHTML += `<div style="margin-bottom:20px;">${ejecutarMotor(txt, maxM, false)}</div>`;
+            if(modo === 'normal') {
+                board.innerHTML += `<div style="margin-bottom:20px;">${txt}</div>`;
             } else {
-                const chatId = [myNick, selectedNick].sort().join('_');
-                db.ref('mensajes/' + chatId).push({ emisor: myNick, texto: txt });
+                board.innerHTML += `<div style="margin-bottom:20px;">${ejecutarMotor(txt, maxM, false)}</div>`;
             }
             input.value = "";
+            board.scrollTop = board.scrollHeight;
         }
 
         function tratarSignos(palabra, inverso) {
@@ -215,7 +256,6 @@
             }
             return res;
         }
-        window.onresize = cal;
     </script>
 </body>
 </html>
