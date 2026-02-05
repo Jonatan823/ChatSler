@@ -45,6 +45,21 @@
             cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; 
         }
         .nav-btn:hover { background: #000; color: #fff; }
+
+        /* ESTO ES LO NUEVO PARA EL PRIVADO */
+        .sler-privado-line {
+            font-size: 15px;
+            width: 100%;
+            display: block;
+            line-height: 1.2;
+            white-space: pre; /* Para que respete los espacios del padding */
+        }
+        
+        /* Esta regla pone los puntitos cada 4 líneas automáticamente */
+        .sler-privado-line:nth-child(4n) {
+            border-bottom: 1px dotted #999;
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
@@ -61,7 +76,7 @@
 
     <div id="sidebar-left">
         <div class="practice-header">CONTACTOS</div>
-        <div id="users-list" style="flex:1; padding:10px;"></div>
+        <div id="users-list" style="flex:1; padding:10px; overflow-y: auto;"></div>
         <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
     </div>
 
@@ -73,6 +88,7 @@
             <div style="display:flex; gap:10px; margin-top:5px;">
                 <button class="nav-btn" onclick="procesar('sler')">VISTA S.L.E.R.</button>
                 <button class="nav-btn" onclick="procesar('normal')">VISTA NORMAL</button>
+                <button class="nav-btn" style="font-size:10px;" onclick="motorPrivado(document.getElementById('main-input').value, document.getElementById('users-list'))">TEST PRIVADO</button>
             </div>
         </div>
     </div>
@@ -89,95 +105,6 @@
         let maxM = 0;
         let originalText = "";
 
-        // CALIBRACIÓN DEL MOLDE
         function cal() {
             const span = document.createElement('span');
-            span.style.font = "19px 'Courier New', monospace";
-            span.innerText = "W"; document.body.appendChild(span);
-            let anchoDisponible = document.getElementById('practice-board').clientWidth - 80;
-            maxM = Math.floor(anchoDisponible / span.offsetWidth);
-            if(maxM > 60) maxM = 60; // Forzamos el molde de 60
-            document.getElementById('mChars').innerText = maxM;
-            document.body.removeChild(span);
-        }
-        window.onresize = cal;
-
-        // FUNCIÓN DE ENTRADA CORREGIDA
-        function acceder() {
-            const nick = document.getElementById('nick').value.trim();
-            if(nick !== "") {
-                document.getElementById('login-screen').style.display = 'none';
-                setTimeout(cal, 100); // Calibramos ni bien entramos
-            } else {
-                alert("Por favor, ingresa tu Nick.");
-            }
-        }
-
-        function tratarSignos(palabra, inverso) {
-            if (!inverso) return palabra;
-            const inicioMatch = palabra.match(/^([¿¡]+)/);
-            const finMatch = palabra.match(/([.,;!?]+)$/);
-            let limpia = palabra;
-            let sApertura = inicioMatch ? inicioMatch[1] : "";
-            let sCierre = finMatch ? finMatch[1] : "";
-            if (sApertura) limpia = limpia.substring(sApertura.length);
-            if (sCierre) limpia = limpia.substring(0, limpia.length - sCierre.length);
-            return sCierre + limpia + sApertura;
-        }
-
-        function procesar(modo) {
-            let input = document.getElementById('main-input');
-            let board = document.getElementById('practice-board');
-            
-            if(input.value.trim() !== "") {
-                originalText = input.value;
-            }
-            
-            if(!originalText) return;
-
-            if(modo === 'normal') {
-                // Limpia y muestra el texto original aplanado
-                board.innerHTML = `<div style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">${originalText}</div>`;
-                input.value = "";
-                return;
-            }
-
-            // MOTOR SLER - REPARACIÓN DE MÁRGENES E INVERSIÓN
-            let mazo = originalText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
-            let res = "", par = false;
-
-            while (mazo.length > 0) {
-                let lin = "";
-                while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= maxM) {
-                    lin += (lin ? " " : "") + mazo.shift();
-                }
-                
-                // Lógica de Fraccionamiento (> 7 caracteres)
-                let h = maxM - lin.length;
-                if (mazo.length > 0 && h >= 3 && mazo[0].length > 7) {
-                    let p = mazo[0];
-                    let c = h - 1;
-                    if (c < 2) c = 2; 
-
-                    if (!par) { lin += (lin ? " " : "") + p.substring(0, c) + "-"; } 
-                    else { lin += (lin ? " " : "") + "-" + p.substring(0, c); }
-                    mazo[0] = p.substring(c);
-                }
-
-                if (par) {
-                    let inv = lin.split(' ').map(w => tratarSignos(w, true)).reverse().join(' ');
-                    // Alineación derecha forzada con espacios
-                    let padding = " ".repeat(Math.max(0, maxM - inv.length));
-                    res += `<div class="sler-line">${padding}${inv}</div>`;
-                } else {
-                    res += `<div class="sler-line">${lin}</div>`;
-                }
-                par = !par;
-            }
-            board.innerHTML = res;
-            input.value = ""; 
-            board.scrollTop = board.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+            span.style.font = "19px 'Courier New',
