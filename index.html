@@ -11,7 +11,6 @@
             display: flex; overflow: hidden; 
         }
 
-        /* LOGIN ORIGINAL */
         #login-screen { 
             position: fixed; inset: 0; background: #fff; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
@@ -23,7 +22,6 @@
             font-family: 'Courier New'; text-align: center; font-size: 18px; 
         }
 
-        /* ESTRUCTURA */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
@@ -36,13 +34,188 @@
         }
 
         .sler-line { color: #000; width: 100%; display: block; }
-        
-        /* ESTILO PARA CHAT PRIVADO */
-        .sler-privado-line {
-            font-size: 15px; width: 100%; display: block; line-height: 1.2; white-space: pre;
+        .sler-privado-line { font-size: 15px; width: 100%; display: block; line-height: 1.2; white-space: pre; }
+        .sler-privado-line:nth-child(4n) { border-bottom: 1px dotted #999; margin-bottom: 4px; }
+
+        .user-item { padding: 12px; border-bottom: 1px solid #000; cursor: pointer; font-weight: bold; background: #fff; }
+        .user-item:hover { background: #000; color: #fff; }
+        .user-selected { background: #000; color: #fff; }
+
+        #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
+        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
+
+        .nav-btn { 
+            width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; 
+            cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; 
         }
-        .sler-privado-line:nth-child(4n) {
-            border-bottom: 1px dotted #999; margin-bottom: 4px;
+        .nav-btn:hover { background: #000; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-box">
+            <h2><u>CHAT SLER</u></h2>
+            <input type="text" id="nick" placeholder="NICK">
+            <input type="password" id="pass" placeholder="CONTRASEÑA">
+            <input type="email" id="mail" placeholder="EMAIL">
+            <button class="nav-btn" style="background: #000; color: #fff; font-size: 16px;" onclick="acceder()">ENTRAR</button>
+        </div>
+    </div>
+
+    <div id="sidebar-left">
+        <div class="practice-header">CONTACTOS</div>
+        <div id="users-list" style="flex:1; overflow-y: auto;"></div>
+        <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
+    </div>
+
+    <div id="main-practice">
+        <div class="practice-header" id="chat-title">ESCRITORIO PERSONAL</div>
+        <div id="practice-board"></div>
+        <div id="input-zone">
+            <textarea id="main-input" placeholder="Escribe..."></textarea>
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <button class="nav-btn" onclick="procesar('sler')">VISTA S.L.E.R.</button>
+                <button class="nav-btn" onclick="procesar('normal')">VISTA NORMAL</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sidebar-right">
+        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">DATOS:</div>
+        <div style="font-size: 12px;">MAX CH: <span id="mChars">60</span></div>
+        <hr style="border:1px solid #000;">
+        <button class="nav-btn">TEST</button>
+        <button class="nav-btn">HOME</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
+            authDomain: "sler-chat-lab.firebaseapp.com",
+            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
+            projectId: "sler-chat-lab",
+            storageBucket: "sler-chat-lab.firebasestorage.app",
+            messagingSenderId: "594954603335",
+            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        let myNick = "", selectedNick = "", maxM = 60;
+
+        function acceder() {
+            myNick = document.getElementById('nick').value.trim();
+            if(myNick) {
+                db.ref('usuarios/' + myNick).set({ nick: myNick, online: true });
+                document.getElementById('login-screen').style.display = 'none';
+                escucharContactos();
+                cal();
+            }
         }
 
-        .user-item {
+        function cal() {
+            const board = document.getElementById('practice-board');
+            const span = document.createElement('span');
+            span.style.font = "19px 'Courier New', monospace";
+            span.innerText = "W"; document.body.appendChild(span);
+            maxM = Math.floor((board.clientWidth - 80) / span.offsetWidth);
+            if(maxM > 60) maxM = 60;
+            document.getElementById('mChars').innerText = maxM;
+            document.body.removeChild(span);
+        }
+
+        function escucharContactos() {
+            db.ref('usuarios').on('value', (snap) => {
+                const list = document.getElementById('users-list');
+                list.innerHTML = "";
+                snap.forEach((child) => {
+                    const u = child.val();
+                    if(u.nick !== myNick) {
+                        const div = document.createElement('div');
+                        div.className = 'user-item' + (u.nick === selectedNick ? ' user-selected' : '');
+                        div.innerText = u.nick;
+                        div.onclick = () => abrirChat(u.nick);
+                        list.appendChild(div);
+                    }
+                });
+            });
+        }
+
+        function abrirChat(nick) {
+            selectedNick = nick;
+            document.getElementById('chat-title').innerText = "PRIVADO CON: " + nick;
+            document.getElementById('practice-board').innerHTML = "";
+            const chatId = [myNick, selectedNick].sort().join('_');
+            db.ref('mensajes/' + chatId).off();
+            db.ref('mensajes/' + chatId).on('child_added', (snap) => {
+                renderizar(snap.val());
+            });
+        }
+
+        function renderizar(msg) {
+            const board = document.getElementById('practice-board');
+            const esMio = msg.emisor === myNick;
+            const style = esMio ? "border-left: 3px solid #000; background:#f9f9f9;" : "border-right: 3px solid #000; background:#fff;";
+            const bloque = ejecutarMotor(msg.texto, 25, true);
+            board.innerHTML += `<div style="margin-bottom:20px; padding:10px; ${style}">${bloque}</div>`;
+            board.scrollTop = board.scrollHeight;
+        }
+
+        function procesar(modo) {
+            const input = document.getElementById('main-input');
+            const txt = input.value.trim();
+            if(!txt) return;
+
+            if(!selectedNick) {
+                document.getElementById('practice-board').innerHTML += `<div style="margin-bottom:20px;">${ejecutarMotor(txt, maxM, false)}</div>`;
+            } else {
+                const chatId = [myNick, selectedNick].sort().join('_');
+                db.ref('mensajes/' + chatId).push({ emisor: myNick, texto: txt });
+            }
+            input.value = "";
+        }
+
+        function tratarSignos(palabra, inverso) {
+            if (!inverso) return palabra;
+            const inicioMatch = palabra.match(/^([¿¡]+)/);
+            const finMatch = palabra.match(/([.,;!?]+)$/);
+            let limpia = palabra;
+            let sApertura = inicioMatch ? inicioMatch[1] : "";
+            let sCierre = finMatch ? finMatch[1] : "";
+            if (sApertura) limpia = limpia.substring(sApertura.length);
+            if (sCierre) limpia = limpia.substring(0, limpia.length - sCierre.length);
+            return sCierre + limpia + sApertura;
+        }
+
+        function ejecutarMotor(texto, limite, esPrivado) {
+            let mazo = texto.replace(/\s+/g, ' ').trim().split(' ');
+            let res = "", par = false, lineCount = 0;
+            const clase = esPrivado ? "sler-privado-line" : "sler-line";
+
+            while (mazo.length > 0) {
+                let lin = "";
+                while (mazo.length > 0 && (lin.length + mazo[0].length + 1) <= limite) {
+                    lin += (lin ? " " : "") + mazo.shift();
+                }
+                lineCount++;
+                let puntitos = (esPrivado && lineCount % 4 === 0) ? "border-bottom: 1px dotted #999; margin-bottom: 4px;" : "";
+
+                if (par) {
+                    let inv = lin.split(' ').map(w => tratarSignos(w, true)).reverse().join(' ');
+                    let pad = " ".repeat(Math.max(0, limite - inv.length));
+                    res += `<div class="${clase}" style="${puntitos}">${pad}${inv}</div>`;
+                } else {
+                    res += `<div class="${clase}" style="${puntitos}">${lin}</div>`;
+                }
+                par = !par;
+            }
+            return res;
+        }
+        window.onresize = cal;
+    </script>
+</body>
+</html>
