@@ -23,7 +23,7 @@
             font-family: 'Courier New'; text-align: center; font-size: 18px; 
         }
 
-        /* ESTRUCTURA VISUAL FIEL A CAPTURA 3174 */
+        /* ESTRUCTURA */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
@@ -35,7 +35,6 @@
             white-space: pre; font-size: 19px; line-height: 1.5;
         }
 
-        /* MOTOR SLER */
         .sler-line { color: #000; width: 100%; display: block; }
         .sler-privado-line { font-size: 15px; width: 100%; display: block; line-height: 1.2; white-space: pre; }
         .sler-privado-line:nth-child(4n) { border-bottom: 1px dotted #999; margin-bottom: 4px; }
@@ -52,15 +51,15 @@
         }
         .nav-btn:hover { background: #000; color: #fff; }
 
-        /* VENTANA EMERGENTE DE CHAT PRIVADO */
+        /* VENTANA PRIVADA ACTUALIZADA (3175) */
         #chat-popup {
-            position: fixed; bottom: 20px; right: 230px; width: 350px; height: 450px;
+            position: fixed; bottom: 20px; right: 230px; width: 380px; height: 500px;
             background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000;
-            box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
         }
         #chat-popup-messages { flex: 1; overflow-y: auto; padding: 10px; background: #fff; border-bottom: 2px solid #000; }
-        #chat-popup-input { padding: 10px; background: #eee; }
-        #chat-popup-input input { width: 100%; padding: 8px; border: 2px solid #000; font-family: 'Courier New'; }
+        #chat-popup-input { padding: 10px; background: #eee; display: flex; flex-direction: column; gap: 5px; }
+        #chat-popup-input input { width: 100%; padding: 10px; border: 2px solid #000; font-family: 'Courier New'; font-size: 16px; }
+        .btn-group-priv { display: flex; gap: 5px; }
     </style>
 </head>
 <body>
@@ -70,14 +69,14 @@
             <h2><u>CHAT SLER</u></h2>
             <input type="text" id="nick" placeholder="NICK">
             <input type="password" id="pass" placeholder="CONTRASEÑA">
-            <input type="email" id="mail" placeholder="EMAIL FICTICIO">
+            <input type="email" id="mail" placeholder="EMAIL">
             <button class="nav-btn" style="background: #000; color: #fff; font-size: 16px;" onclick="acceder()">ENTRAR AL SISTEMA</button>
         </div>
     </div>
 
     <div id="sidebar-left">
         <div class="practice-header">CONTACTOS</div>
-        <div id="users-list" style="flex:1; overflow-y: auto; padding-top: 10px;"></div>
+        <div id="users-list" style="flex:1; overflow-y: auto;"></div>
         <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR (LOGIN)</button>
     </div>
 
@@ -85,7 +84,7 @@
         <div class="practice-header">ESCRITORIO PERSONAL - PRÁCTICA 60 CH</div>
         <div id="practice-board"></div>
         <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe para practicar el sistema SLER..."></textarea>
+            <textarea id="main-input" placeholder="Escribe para practicar..."></textarea>
             <div style="display:flex; gap:10px; margin-top:5px;">
                 <button class="nav-btn" onclick="procesarEscritorio('sler')">PROCESAR SLER</button>
                 <button class="nav-btn" onclick="procesarEscritorio('normal')">TEXTO NORMAL</button>
@@ -95,8 +94,6 @@
 
     <div id="sidebar-right">
         <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">HERRAMIENTAS:</div>
-        <div style="font-size: 11px;">MAX CH: <span id="mChars">60</span></div>
-        <hr style="border:1px solid #000;">
         <button class="nav-btn">INGRESAR AL TEST</button>
         <button class="nav-btn">PÁGINA PRINCIPAL</button>
         <button class="nav-btn">¿QUÉ ES SLER?</button>
@@ -104,11 +101,14 @@
     </div>
 
     <div id="chat-popup">
-        <div class="practice-header" id="popup-title" style="cursor: move;">CHAT: USUARIO</div>
+        <div class="practice-header" id="popup-title">CHAT CON: -</div>
         <div id="chat-popup-messages"></div>
         <div id="chat-popup-input">
-            <input type="text" id="priv-input" placeholder="Escribe y presiona Enter..." onkeydown="if(event.key==='Enter') enviarPrivado()">
-            <button class="nav-btn" style="margin-top:5px; padding:5px;" onclick="cerrarChat()">CERRAR VENTANA</button>
+            <input type="text" id="priv-input" placeholder="Escribe aquí..." onkeydown="if(event.key==='Enter') enviarPrivado()">
+            <div class="btn-group-priv">
+                <button class="nav-btn" style="flex:2; background:#000; color:#fff;" onclick="enviarPrivado()">ENTER</button>
+                <button class="nav-btn" style="flex:1;" onclick="cerrarChat()">CERRAR</button>
+            </div>
         </div>
     </div>
 
@@ -147,7 +147,6 @@
             span.innerText = "W"; document.body.appendChild(span);
             maxM = Math.floor((board.clientWidth - 80) / span.offsetWidth);
             if(maxM > 60) maxM = 60;
-            document.getElementById('mChars').innerText = maxM;
             document.body.removeChild(span);
         }
 
@@ -173,7 +172,6 @@
             document.getElementById('popup-title').innerText = "CHAT CON: " + nick;
             document.getElementById('chat-popup').style.display = 'flex';
             document.getElementById('chat-popup-messages').innerHTML = "";
-            
             const chatId = [myNick, selectedNick].sort().join('_');
             db.ref('mensajes/' + chatId).off();
             db.ref('mensajes/' + chatId).on('child_added', (snap) => {
@@ -181,16 +179,14 @@
             });
         }
 
-        function cerrarChat() {
-            document.getElementById('chat-popup').style.display = 'none';
-            selectedNick = "";
-        }
+        function cerrarChat() { document.getElementById('chat-popup').style.display = 'none'; selectedNick = ""; }
 
         function renderizarPrivado(msg) {
             const container = document.getElementById('chat-popup-messages');
             const esMio = msg.emisor === myNick;
             const style = esMio ? "border-left: 3px solid #000; background:#f9f9f9;" : "border-right: 3px solid #000; background:#fff;";
-            const bloque = ejecutarMotor(msg.texto, 25, true);
+            // Ajustado a 28 caracteres según lo solicitado
+            const bloque = ejecutarMotor(msg.texto, 28, true);
             container.innerHTML += `<div style="margin-bottom:15px; padding:8px; ${style}">${bloque}</div>`;
             container.scrollTop = container.scrollHeight;
         }
@@ -206,17 +202,11 @@
         }
 
         function procesarEscritorio(modo) {
-            const input = document.getElementById('main-input');
             const board = document.getElementById('practice-board');
-            const txt = input.value.trim();
+            const txt = document.getElementById('main-input').value.trim();
             if(!txt) return;
-
-            if(modo === 'normal') {
-                board.innerHTML += `<div style="margin-bottom:20px;">${txt}</div>`;
-            } else {
-                board.innerHTML += `<div style="margin-bottom:20px;">${ejecutarMotor(txt, maxM, false)}</div>`;
-            }
-            input.value = "";
+            board.innerHTML += `<div style="margin-bottom:20px;">${modo === 'normal' ? txt : ejecutarMotor(txt, maxM, false)}</div>`;
+            document.getElementById('main-input').value = "";
             board.scrollTop = board.scrollHeight;
         }
 
@@ -239,23 +229,5 @@
 
             while (mazo.length > 0) {
                 let lin = "";
-                while (mazo.length > 0 && (lin.length + mazo[0].length + 1) <= limite) {
-                    lin += (lin ? " " : "") + mazo.shift();
-                }
-                lineCount++;
-                let puntitos = (esPrivado && lineCount % 4 === 0) ? "border-bottom: 1px dotted #999; margin-bottom: 4px;" : "";
-
-                if (par) {
-                    let inv = lin.split(' ').map(w => tratarSignos(w, true)).reverse().join(' ');
-                    let pad = " ".repeat(Math.max(0, limite - inv.length));
-                    res += `<div class="${clase}" style="${puntitos}">${pad}${inv}</div>`;
-                } else {
-                    res += `<div class="${clase}" style="${puntitos}">${lin}</div>`;
-                }
-                par = !par;
-            }
-            return res;
-        }
-    </script>
-</body>
-</html>
+                while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= limite) {
+                    lin += (lin ? " " : "") + mazo.
