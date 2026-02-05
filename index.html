@@ -7,14 +7,11 @@
         * { box-sizing: border-box; }
         body { 
             font-family: 'Courier New', Courier, monospace; 
-            background: #c0c0c0; 
-            margin: 0; 
-            height: 100vh; 
-            display: flex; 
-            overflow: hidden; 
+            background: #c0c0c0; margin: 0; height: 100vh; 
+            display: flex; overflow: hidden; 
         }
 
-        /* LOGIN ORIGINAL RESTAURADO */
+        /* LOGIN */
         #login-screen { 
             position: fixed; inset: 0; background: #fff; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
@@ -26,7 +23,7 @@
             font-family: 'Courier New'; text-align: center; font-size: 18px; 
         }
 
-        /* ESTRUCTURA DEL ESCRITORIO */
+        /* ESTRUCTURA */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
@@ -34,12 +31,11 @@
         .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
         
         #practice-board { 
-            flex: 1; overflow-y: auto; padding: 35px; background: #fff; 
-            white-space: pre-wrap; font-size: 19px; line-height: 1.2;
+            flex: 1; overflow-y: auto; padding: 40px; background: #fff; 
+            white-space: pre; font-size: 19px; line-height: 1.5;
         }
 
-        /* ESTILOS DEL MOTOR SLER TRANSCRIPTO */
-        .sler-line { color: #000; width: 100%; margin-bottom: 5px; }
+        .sler-line { color: #000; width: 100%; display: block; }
 
         #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
         textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
@@ -87,34 +83,19 @@
         <hr style="border:1px solid #000;">
         <button class="nav-btn">INGRESAR AL TEST</button>
         <button class="nav-btn">PÁGINA PRINCIPAL</button>
-        <button class="nav-btn">¿QUÉ ES SLER?</button>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
     <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyD5ITa76Xc7mmihQPC2AUCHQFStii4NAUg",
-            authDomain: "sler-chat-lab.firebaseapp.com",
-            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
-            projectId: "sler-chat-lab",
-            storageBucket: "sler-chat-lab.firebasestorage.app",
-            messagingSenderId: "594954603335",
-            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
-        };
-        
-        var db;
-        try { firebase.initializeApp(firebaseConfig); db = firebase.database(); } catch(e){}
-
-        let backup = "", maxM = 0;
+        let maxM = 0;
+        let originalText = ""; // Para que el botón normal pueda devolver el texto limpio
 
         function cal() {
             const span = document.createElement('span');
             span.style.font = "19px 'Courier New', monospace";
             span.innerText = "W"; document.body.appendChild(span);
-            // Calibración basada en el ancho del board central
-            maxM = Math.floor((document.getElementById('practice-board').clientWidth - 70) / span.offsetWidth);
+            // Ajustamos a 60 caracteres exactos o lo que dé el contenedor
+            maxM = Math.floor((document.getElementById('practice-board').clientWidth - 80) / span.offsetWidth);
+            if(maxM > 60) maxM = 60; 
             document.getElementById('mChars').innerText = maxM;
             document.body.removeChild(span);
         }
@@ -122,15 +103,12 @@
         setTimeout(cal, 500);
 
         function acceder() {
-            const nick = document.getElementById('nick').value.trim();
-            if(nick) {
+            if(document.getElementById('nick').value.trim()) {
                 document.getElementById('login-screen').style.display = 'none';
-                if(db) db.ref('perfiles/' + nick).update({ online: true, mail: document.getElementById('mail').value });
                 cal();
             }
         }
 
-        // MOTOR TRANSCRIPTO DEL PLUGIN
         function tratarSignos(palabra, inverso) {
             if (!inverso) return palabra;
             const inicioMatch = palabra.match(/^([¿¡]+)/);
@@ -146,30 +124,45 @@
         function procesar(modo) {
             let input = document.getElementById('main-input');
             let board = document.getElementById('practice-board');
-            let txt = input.value;
-            if(!txt) return;
+            
+            // Si hay texto en el input, lo guardamos. Si no, usamos el backup anterior.
+            if(input.value.trim() !== "") {
+                originalText = input.value;
+            }
+            
+            if(!originalText) return;
 
+            // BOTÓN NORMAL: Devuelve el texto aplanado (limpia la pizarra y lo pone normal)
             if(modo === 'normal') {
-                board.innerHTML += `<div style="margin-bottom:20px;">${txt}</div>`;
-                input.value = ""; board.scrollTop = board.scrollHeight;
+                board.innerHTML = `<div style="white-space: pre-wrap; word-wrap: break-word;">${originalText}</div>`;
+                input.value = "";
                 return;
             }
 
-            let mazo = txt.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
+            // MODO SLER
+            let mazo = originalText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
             let res = "", par = false;
 
             while (mazo.length > 0) {
                 let lin = "";
-                while (mazo.length > 0 && (lin.length + mazo[0].length + 1) <= maxM) {
+                // Llenamos la línea hasta donde quepa la palabra entera
+                while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= maxM) {
                     lin += (lin ? " " : "") + mazo.shift();
                 }
                 
+                // FRACCIONAMIENTO: Si todavía queda espacio y la palabra es larga (>7)
                 let h = maxM - lin.length;
-                if (h >= 2 && mazo.length > 0) {
-                    let p = mazo[0], c = h - 1;
-                    if (!par) { lin += (lin ? " " : "") + p.substring(0, c) + "-"; } 
-                    else { lin += (lin ? " " : "") + "-" + p.substring(0, c); }
-                    mazo[0] = p.substring(c);
+                if (mazo.length > 0 && h >= 3 && mazo[0].length > 7) {
+                    let p = mazo[0];
+                    let corte = h - 2; // Dejamos espacio para el guion
+                    if (corte < 2) corte = 2; // Regla de no dejar una sola letra
+
+                    if (!par) { // Línea M
+                        lin += (lin ? " " : "") + p.substring(0, corte) + "-";
+                    } else { // Línea C
+                        lin += (lin ? " " : "") + "-" + p.substring(0, corte);
+                    }
+                    mazo[0] = p.substring(corte);
                 }
 
                 if (par) {
@@ -181,8 +174,8 @@
                 }
                 par = !par;
             }
-            board.innerHTML += `<div style="margin-bottom:30px;">${res}</div>`;
-            input.value = ""; board.scrollTop = board.scrollHeight;
+            board.innerHTML = res;
+            input.value = ""; 
         }
     </script>
 </body>
