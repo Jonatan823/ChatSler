@@ -121,23 +121,73 @@
             return sCierre + limpia + sApertura;
         }
 
-        function procesar(modo) {
+       function procesar(modo) {
             let input = document.getElementById('main-input');
             let board = document.getElementById('practice-board');
             
-            // Si hay texto en el input, lo guardamos. Si no, usamos el backup anterior.
             if(input.value.trim() !== "") {
                 originalText = input.value;
             }
             
             if(!originalText) return;
 
-            // BOTÓN NORMAL: Devuelve el texto aplanado (limpia la pizarra y lo pone normal)
             if(modo === 'normal') {
-                board.innerHTML = `<div style="white-space: pre-wrap; word-wrap: break-word;">${originalText}</div>`;
+                // APLANADO: Limpia y muestra el texto ocupando todo el ancho
+                board.innerHTML = `<div style="white-space: pre-wrap; word-wrap: break-word; text-align: justify;">${originalText}</div>`;
                 input.value = "";
                 return;
             }
+
+            // MODO SLER CON REGLAS DE PROPIEDAD INTELECTUAL
+            let mazo = originalText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
+            let res = "", par = false;
+
+            while (mazo.length > 0) {
+                let lin = "";
+                // 1. Intentamos llenar la línea lo máximo posible
+                while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= maxM) {
+                    lin += (lin ? " " : "") + mazo.shift();
+                }
+                
+                // 2. FRACCIONAMIENTO QUIRÚRGICO (Regla > 7 caracteres)
+                let espacioRestante = maxM - lin.length;
+                if (mazo.length > 0 && espacioRestante >= 3 && mazo[0].length > 7) {
+                    let palabraLarga = mazo[0];
+                    let corte = espacioRestante - 1; // Espacio para el guion
+                    
+                    // Aseguramos no dejar 1 sola letra (mínimo 2 antes del guion)
+                    if (corte < 2) corte = 2;
+
+                    if (!par) { // Línea M (Impar): Guion al final
+                        lin += (lin ? " " : "") + palabraLarga.substring(0, corte) + "-";
+                    } else { // Línea C (Par): Guion al principio
+                        lin += (lin ? " " : "") + "-" + palabraLarga.substring(0, corte);
+                    }
+                    mazo[0] = palabraLarga.substring(corte);
+                }
+
+                // 3. RENDERIZADO E INVERSIÓN (Alineación Forzada)
+                if (par) {
+                    // Invertimos palabras y aplicamos espejo de signos
+                    let palabrasInv = lin.split(' ').map(w => tratarSignos(w, true)).reverse();
+                    let textoInv = palabrasInv.join(' ');
+                    
+                    // RELLENO (Padding) para asegurar que el texto se pegue a la DERECHA
+                    let faltan = maxM - textoInv.length;
+                    let relleno = (faltan > 0) ? " ".repeat(faltan) : "";
+                    
+                    res += `<div class="sler-line">${relleno}${textoInv}</div>`;
+                } else {
+                    // Línea normal pegada a la IZQUIERDA
+                    res += `<div class="sler-line">${lin}</div>`;
+                }
+                par = !par;
+            }
+            
+            board.innerHTML = res;
+            input.value = ""; 
+            board.scrollTop = board.scrollHeight;
+        }
 
             // MODO SLER
             let mazo = originalText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
