@@ -11,7 +11,7 @@
             display: flex; overflow: hidden; 
         }
 
-        /* LOGIN */
+        /* LOGIN ORIGINAL */
         #login-screen { 
             position: fixed; inset: 0; background: #fff; z-index: 9999; 
             display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
@@ -87,25 +87,29 @@
 
     <script>
         let maxM = 0;
-        let originalText = ""; // Para que el botón normal pueda devolver el texto limpio
+        let originalText = "";
 
+        // CALIBRACIÓN DEL MOLDE
         function cal() {
             const span = document.createElement('span');
             span.style.font = "19px 'Courier New', monospace";
             span.innerText = "W"; document.body.appendChild(span);
-            // Ajustamos a 60 caracteres exactos o lo que dé el contenedor
-            maxM = Math.floor((document.getElementById('practice-board').clientWidth - 80) / span.offsetWidth);
-            if(maxM > 60) maxM = 60; 
+            let anchoDisponible = document.getElementById('practice-board').clientWidth - 80;
+            maxM = Math.floor(anchoDisponible / span.offsetWidth);
+            if(maxM > 60) maxM = 60; // Forzamos el molde de 60
             document.getElementById('mChars').innerText = maxM;
             document.body.removeChild(span);
         }
         window.onresize = cal;
-        setTimeout(cal, 500);
 
+        // FUNCIÓN DE ENTRADA CORREGIDA
         function acceder() {
-            if(document.getElementById('nick').value.trim()) {
+            const nick = document.getElementById('nick').value.trim();
+            if(nick !== "") {
                 document.getElementById('login-screen').style.display = 'none';
-                cal();
+                setTimeout(cal, 100); // Calibramos ni bien entramos
+            } else {
+                alert("Por favor, ingresa tu Nick.");
             }
         }
 
@@ -121,7 +125,7 @@
             return sCierre + limpia + sApertura;
         }
 
-       function procesar(modo) {
+        function procesar(modo) {
             let input = document.getElementById('main-input');
             let board = document.getElementById('practice-board');
             
@@ -132,91 +136,37 @@
             if(!originalText) return;
 
             if(modo === 'normal') {
-                // APLANADO: Limpia y muestra el texto ocupando todo el ancho
-                board.innerHTML = `<div style="white-space: pre-wrap; word-wrap: break-word; text-align: justify;">${originalText}</div>`;
+                // Limpia y muestra el texto original aplanado
+                board.innerHTML = `<div style="white-space: pre-wrap; word-wrap: break-word; line-height: 1.4;">${originalText}</div>`;
                 input.value = "";
                 return;
             }
 
-            // MODO SLER CON REGLAS DE PROPIEDAD INTELECTUAL
+            // MOTOR SLER - REPARACIÓN DE MÁRGENES E INVERSIÓN
             let mazo = originalText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
             let res = "", par = false;
 
             while (mazo.length > 0) {
                 let lin = "";
-                // 1. Intentamos llenar la línea lo máximo posible
                 while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= maxM) {
                     lin += (lin ? " " : "") + mazo.shift();
                 }
                 
-                // 2. FRACCIONAMIENTO QUIRÚRGICO (Regla > 7 caracteres)
-                let espacioRestante = maxM - lin.length;
-                if (mazo.length > 0 && espacioRestante >= 3 && mazo[0].length > 7) {
-                    let palabraLarga = mazo[0];
-                    let corte = espacioRestante - 1; // Espacio para el guion
-                    
-                    // Aseguramos no dejar 1 sola letra (mínimo 2 antes del guion)
-                    if (corte < 2) corte = 2;
-
-                    if (!par) { // Línea M (Impar): Guion al final
-                        lin += (lin ? " " : "") + palabraLarga.substring(0, corte) + "-";
-                    } else { // Línea C (Par): Guion al principio
-                        lin += (lin ? " " : "") + "-" + palabraLarga.substring(0, corte);
-                    }
-                    mazo[0] = palabraLarga.substring(corte);
-                }
-
-                // 3. RENDERIZADO E INVERSIÓN (Alineación Forzada)
-                if (par) {
-                    // Invertimos palabras y aplicamos espejo de signos
-                    let palabrasInv = lin.split(' ').map(w => tratarSignos(w, true)).reverse();
-                    let textoInv = palabrasInv.join(' ');
-                    
-                    // RELLENO (Padding) para asegurar que el texto se pegue a la DERECHA
-                    let faltan = maxM - textoInv.length;
-                    let relleno = (faltan > 0) ? " ".repeat(faltan) : "";
-                    
-                    res += `<div class="sler-line">${relleno}${textoInv}</div>`;
-                } else {
-                    // Línea normal pegada a la IZQUIERDA
-                    res += `<div class="sler-line">${lin}</div>`;
-                }
-                par = !par;
-            }
-            
-            board.innerHTML = res;
-            input.value = ""; 
-            board.scrollTop = board.scrollHeight;
-        }
-
-            // MODO SLER
-            let mazo = originalText.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
-            let res = "", par = false;
-
-            while (mazo.length > 0) {
-                let lin = "";
-                // Llenamos la línea hasta donde quepa la palabra entera
-                while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= maxM) {
-                    lin += (lin ? " " : "") + mazo.shift();
-                }
-                
-                // FRACCIONAMIENTO: Si todavía queda espacio y la palabra es larga (>7)
+                // Lógica de Fraccionamiento (> 7 caracteres)
                 let h = maxM - lin.length;
                 if (mazo.length > 0 && h >= 3 && mazo[0].length > 7) {
                     let p = mazo[0];
-                    let corte = h - 2; // Dejamos espacio para el guion
-                    if (corte < 2) corte = 2; // Regla de no dejar una sola letra
+                    let c = h - 1;
+                    if (c < 2) c = 2; 
 
-                    if (!par) { // Línea M
-                        lin += (lin ? " " : "") + p.substring(0, corte) + "-";
-                    } else { // Línea C
-                        lin += (lin ? " " : "") + "-" + p.substring(0, corte);
-                    }
-                    mazo[0] = p.substring(corte);
+                    if (!par) { lin += (lin ? " " : "") + p.substring(0, c) + "-"; } 
+                    else { lin += (lin ? " " : "") + "-" + p.substring(0, c); }
+                    mazo[0] = p.substring(c);
                 }
 
                 if (par) {
                     let inv = lin.split(' ').map(w => tratarSignos(w, true)).reverse().join(' ');
+                    // Alineación derecha forzada con espacios
                     let padding = " ".repeat(Math.max(0, maxM - inv.length));
                     res += `<div class="sler-line">${padding}${inv}</div>`;
                 } else {
@@ -226,6 +176,7 @@
             }
             board.innerHTML = res;
             input.value = ""; 
+            board.scrollTop = board.scrollHeight;
         }
     </script>
 </body>
