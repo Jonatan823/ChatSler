@@ -2,35 +2,52 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CHAT SLER - Motor Oficial 2026</title>
+    <title>CHAT SLER - 2026</title>
     <style>
         * { box-sizing: border-box; }
-        body { font-family: 'Consolas', 'Courier New', monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
-        
-        /* LOGIN */
-        #login-screen { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
-        .login-box { width: 400px; text-align: center; }
-        .login-box h2 { text-decoration: underline; margin-bottom: 20px; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; font-family: 'Consolas'; text-align: center; }
-
-        /* ESTRUCTURA */
-        #sidebar-left { width: 200px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
-        #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; }
-        #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 8px; }
-
-        /* PIZARRA SLER (ESTILO PLUGIN) */
-        .practice-header { background: #000; color: #fff; padding: 8px; text-align: center; font-size: 13px; font-weight: bold; }
-        #practice-board { 
-            flex: 1; overflow-y: auto; padding: 40px; background: #fff; 
-            white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; font-size: 15px; 
+        body { 
+            font-family: 'Courier New', Courier, monospace; 
+            background: #c0c0c0; 
+            margin: 0; 
+            height: 100vh; 
+            display: flex; 
+            overflow: hidden; 
         }
-        .sler-line { color: #000; display: block; width: 100%; }
 
-        /* INPUT AREA */
+        /* LOGIN ORIGINAL RESTAURADO */
+        #login-screen { 
+            position: fixed; inset: 0; background: #fff; z-index: 9999; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
+        }
+        .login-box { width: 450px; text-align: center; }
+        .login-box h2 { text-decoration: underline; margin-bottom: 30px; letter-spacing: 2px; }
+        .login-box input { 
+            width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; 
+            font-family: 'Courier New'; text-align: center; font-size: 18px; 
+        }
+
+        /* ESTRUCTURA DEL ESCRITORIO */
+        #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
+        #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
+        #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+
+        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; }
+        
+        #practice-board { 
+            flex: 1; overflow-y: auto; padding: 35px; background: #fff; 
+            white-space: pre-wrap; font-size: 19px; line-height: 1.2;
+        }
+
+        /* ESTILOS DEL MOTOR SLER TRANSCRIPTO */
+        .sler-line { color: #000; width: 100%; margin-bottom: 5px; }
+
         #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
-        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Consolas'; font-size: 16px; padding: 10px; resize: none; }
+        textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
 
-        .nav-btn { width: 100%; padding: 10px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Consolas'; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        .nav-btn { 
+            width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; 
+            cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; 
+        }
         .nav-btn:hover { background: #000; color: #fff; }
     </style>
 </head>
@@ -41,22 +58,23 @@
             <h2><u>CHAT SLER</u></h2>
             <input type="text" id="nick" placeholder="NICK">
             <input type="password" id="pass" placeholder="CONTRASEÑA">
-            <button class="nav-btn" style="background: #000; color: #fff;" onclick="acceder()">ENTRAR</button>
+            <input type="email" id="mail" placeholder="EMAIL">
+            <button class="nav-btn" style="background: #000; color: #fff; font-size: 16px;" onclick="acceder()">ENTRAR A PRACTICAR</button>
         </div>
     </div>
 
     <div id="sidebar-left">
-        <div class="practice-header">USUARIOS</div>
+        <div class="practice-header">CONTACTOS</div>
         <div id="users-list" style="flex:1; padding:10px;"></div>
         <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
     </div>
 
     <div id="main-practice">
-        <div class="practice-header">ESCRITORIO PERSONAL - MOTOR S.L.E.R.</div>
+        <div class="practice-header">ESCRITORIO PERSONAL - PRÁCTICA 60 CH</div>
         <div id="practice-board"></div>
         <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe aquí..."></textarea>
-            <div style="display:flex; gap:10px; margin-top:8px;">
+            <textarea id="main-input" placeholder="Escribe para practicar..."></textarea>
+            <div style="display:flex; gap:10px; margin-top:5px;">
                 <button class="nav-btn" onclick="procesar('sler')">VISTA S.L.E.R.</button>
                 <button class="nav-btn" onclick="procesar('normal')">VISTA NORMAL</button>
             </div>
@@ -64,13 +82,12 @@
     </div>
 
     <div id="sidebar-right">
-        <div class="practice-header" style="background:none; color:#000;">DATOS:</div>
-        <div style="font-size: 11px; font-family: 'Consolas';">
-            MAX CH: <span id="mChars">0</span><br>
-            TOTAL: <span id="tChars">0</span>
-        </div>
-        <hr style="border:1px solid #000; width:100%;">
-        <button class="nav-btn" onclick="exportarTXT()">EXPORTAR TXT</button>
+        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">DATOS:</div>
+        <div style="font-size: 12px;">MAX CH: <span id="mChars">0</span></div>
+        <hr style="border:1px solid #000;">
+        <button class="nav-btn">INGRESAR AL TEST</button>
+        <button class="nav-btn">PÁGINA PRINCIPAL</button>
+        <button class="nav-btn">¿QUÉ ES SLER?</button>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -93,11 +110,11 @@
         let backup = "", maxM = 0;
 
         function cal() {
-            const ed = document.getElementById('practice-board');
             const span = document.createElement('span');
-            span.style.font = "15px 'Consolas', monospace";
+            span.style.font = "19px 'Courier New', monospace";
             span.innerText = "W"; document.body.appendChild(span);
-            maxM = Math.floor((ed.clientWidth - 80) / span.offsetWidth);
+            // Calibración basada en el ancho del board central
+            maxM = Math.floor((document.getElementById('practice-board').clientWidth - 70) / span.offsetWidth);
             document.getElementById('mChars').innerText = maxM;
             document.body.removeChild(span);
         }
@@ -108,12 +125,12 @@
             const nick = document.getElementById('nick').value.trim();
             if(nick) {
                 document.getElementById('login-screen').style.display = 'none';
-                if(db) db.ref('perfiles/' + nick).update({ online: true });
+                if(db) db.ref('perfiles/' + nick).update({ online: true, mail: document.getElementById('mail').value });
                 cal();
             }
         }
 
-        // LÓGICA OFICIAL DE TU PLUGIN
+        // MOTOR TRANSCRIPTO DEL PLUGIN
         function tratarSignos(palabra, inverso) {
             if (!inverso) return palabra;
             const inicioMatch = palabra.match(/^([¿¡]+)/);
@@ -132,15 +149,12 @@
             let txt = input.value;
             if(!txt) return;
 
-            backup = txt;
-            document.getElementById('tChars').innerText = txt.length;
-
             if(modo === 'normal') {
-                board.innerHTML = `<div>${txt}</div>`;
+                board.innerHTML += `<div style="margin-bottom:20px;">${txt}</div>`;
+                input.value = ""; board.scrollTop = board.scrollHeight;
                 return;
             }
 
-            // MOTOR SLER (Backup del Plugin)
             let mazo = txt.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim().split(' ');
             let res = "", par = false;
 
@@ -167,14 +181,8 @@
                 }
                 par = !par;
             }
-            board.innerHTML = res;
-            input.value = "";
-        }
-
-        function exportarTXT() {
-            if(!backup) return alert("Cargue masa primero.");
-            // Aquí se usaría tu sección 6 del backup
-            alert("Exportando con molde S.L.E.R...");
+            board.innerHTML += `<div style="margin-bottom:30px;">${res}</div>`;
+            input.value = ""; board.scrollTop = board.scrollHeight;
         }
     </script>
 </body>
