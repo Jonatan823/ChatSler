@@ -3,69 +3,293 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLER 2026 - SISTEMA DE GRUPOS PRIVADOS</title>
+    <title>SLER 2026 - SISTEMA INTEGRAL</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Courier New', Courier, monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
 
         /* PANTALLA DE ACCESO */
         #login-screen { position: fixed; inset: 0; background: #c0c0c0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
-        .login-box { width: 90%; max-width: 400px; text-align: center; background: #fff; padding: 20px; border: 3px solid #000; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; }
+        .login-box { width: 95%; max-width: 420px; text-align: center; background: #fff; padding: 25px; border: 4px solid #000; box-shadow: 10px 10px 0px #444; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-size: 16px; }
 
         /* ESTRUCTURA PRINCIPAL */
-        #sidebar-left { width: 240px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
+        #sidebar-left { width: 250px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 320px; }
         #sidebar-right { width: 220px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; }
             #sidebar-left, #sidebar-right { width: 100%; height: auto; border: none; border-bottom: 3px solid #000; }
-            #main-practice { height: 60vh; }
+            #main-practice { height: 70vh; }
         }
 
-        /* CABECERAS Y BOTONES */
-        .header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; }
-        .nav-btn { width: 100%; padding: 10px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; text-transform: uppercase; font-size: 11px; margin-bottom: 5px; }
+        /* COMPONENTES SLER */
+        .header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; }
+        .nav-btn { width: 100%; padding: 12px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; text-transform: uppercase; font-size: 11px; }
         .nav-btn:hover { background: #000; color: #fff; }
 
-        /* LISTAS Y CHAT */
-        #users-list, #groups-list { flex: 1; overflow-y: auto; padding: 5px; }
-        .item-box { padding: 10px; border: 2px solid #000; background: #fff; margin-bottom: 5px; cursor: pointer; font-size: 11px; position: relative; }
-        .item-box span { font-size: 9px; color: #666; display: block; }
+        .item-box { padding: 10px; border: 2px solid #000; background: #fff; margin-bottom: 5px; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .item-box:hover { transform: translateX(5px); background: #f0f0f0; }
+        .item-box span { font-size: 10px; color: #666; display: block; margin-top: 3px; }
         
-        #practice-board { flex: 1; overflow-y: auto; padding: 20px; white-space: pre-wrap; font-size: 16px; }
+        #practice-board { flex: 1; overflow-y: auto; padding: 25px; white-space: pre-wrap; font-size: 18px; line-height: 1.6; }
         
-        /* CHAT POPUP */
-        #chat-popup { position: fixed; bottom: 10px; right: 10px; width: 320px; height: 400px; background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000; }
-        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; }
+        /* VENTANA DE CHAT */
+        #chat-popup { position: fixed; bottom: 15px; right: 15px; width: 340px; height: 450px; background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000; box-shadow: 5px 5px 0px #000; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; background: #fff; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h2><u>CHAT SLER 2026</u></h2>
-            <div id="auth-status">Comprobando llave...</div>
+            <h2 style="text-decoration: underline;">SISTEMA SLER 2026</h2>
+            <div id="auth-status" style="font-weight: bold; margin: 20px 0;">Comprobando llave de acceso...</div>
             <div id="login-form" style="display:none;">
-                <input type="text" id="nick" placeholder="NICK">
-                <input type="email" id="mail" placeholder="EMAIL">
-                <input type="password" id="pass" placeholder="PASSWORD">
-                <button class="nav-btn" style="background:#000; color:#fff;" onclick="acceder()">ENTRAR / REGISTRAR</button>
+                <p style="font-size: 12px; margin-bottom: 15px;">Introduce tus credenciales para entrar al grupo</p>
+                <input type="text" id="nick" placeholder="TU NICK">
+                <input type="email" id="mail" placeholder="TU EMAIL">
+                <input type="password" id="pass" placeholder="TU CONTRASEÑA">
+                <button class="nav-btn" style="background:#000; color:#fff; font-size: 14px;" onclick="acceder()">ENTRAR AL SISTEMA</button>
             </div>
         </div>
     </div>
 
     <div id="sidebar-left">
-        <div class="header">MIS GRUPOS</div>
-        <div id="groups-list"></div>
-        <button class="nav-btn" onclick="crearGrupo()">+ CREAR GRUPO</button>
-        <div class="header">MIEMBROS</div>
-        <div id="users-list"></div>
-        <button class="nav-btn" onclick="cerrarSesion()">CERRAR SESIÓN</button>
+        <div class="header">CÍRCULOS PRIVADOS</div>
+        <div id="groups-list" style="flex:1; overflow-y: auto; padding: 10px;"></div>
+        <button class="nav-btn" style="border-width: 3px 0 3px 0;" onclick="crearGrupo()">+ CREAR NUEVO GRUPO</button>
+        <div class="header">MIEMBROS DEL GRUPO</div>
+        <div id="users-list" style="flex:1; overflow-y: auto; padding: 10px;"></div>
+        <button class="nav-btn" onclick="cerrarSesion()" style="background: #fdd;">CERRAR SESIÓN</button>
     </div>
 
     <div id="main-practice">
-        <div class="header" id="board-title">ESCRITORIO PERSONAL</div>
+        <div class="header" id="board-title">ESCRITORIO DE LECTURA</div>
         <div id="practice-board"></div>
-        <div style="padding:10px; background:#ddd; border-top:3px solid #0
+        <div style="padding:15px; background:#ddd; border-top:3px solid #000;">
+            <textarea id="main-input" placeholder="Escribe aquí para procesar..." style="width:100%; height:70px; border:2px solid #000; padding:10px; resize:none; font-family:'Courier New'; font-size: 16px;"></textarea>
+            <button class="nav-btn" style="margin-top:8px; background: #000; color: #fff;" onclick="procesarEscritorio()">PROCESAR CON MOTOR SLER</button>
+        </div>
+    </div>
+
+    <div id="sidebar-right">
+        <div class="header" style="background:none; color:#000; text-align: left; padding-left: 0;">GESTIÓN:</div>
+        <button class="nav-btn" style="background:#000; color:#fff;" onclick="irAlTest()">IR AL TEST (AUTO-LOGIN)</button>
+        <button class="nav-btn" id="btn-invitar" style="display:none; border-color: green;" onclick="invitarAlGrupo()">INVITAR POR NICK</button>
+        <div style="margin-top: auto; font-size: 10px; background: #fff; padding: 10px; border: 1px solid #000;">
+            <b>AYUDA:</b><br>
+            - Creador: tiene la llave ★<br>
+            - Clic derecho: expulsar (Admin)<br>
+            - Clic: chat privado
+        </div>
+    </div>
+
+    <div id="chat-popup">
+        <div class="header" id="popup-title">CHAT PRIVADO</div>
+        <div id="chat-messages"></div>
+        <div style="padding:10px; border-top:2px solid #000; background: #eee;">
+            <input type="text" id="priv-input" placeholder="Mensaje..." style="width:100%; padding:10px; border:2px solid #000; margin-bottom: 5px;" onkeydown="if(event.key==='Enter') enviarPrivado()">
+            <div style="display: flex; gap: 5px;">
+                <button class="nav-btn" style="flex: 3; background:#000; color:#fff;" onclick="enviarPrivado()">ENVIAR</button>
+                <button class="nav-btn" style="flex: 1;" onclick="document.getElementById('chat-popup').style.display='none'">X</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5ItA76Xc7mmihQPC2AUCHQFStii4NAUg",
+            authDomain: "sler-chat-lab.firebaseapp.com",
+            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
+            projectId: "sler-chat-lab",
+            storageBucket: "sler-chat-lab.firebasestorage.app",
+            messagingSenderId: "594954603335",
+            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+        
+        let myNick = localStorage.getItem('sler_nick') || "";
+        let grupoActivo = null;
+        let selectedNick = "";
+
+        // MONITOR DE SESIÓN CON TIMEOUT
+        auth.onAuthStateChanged((user) => {
+            if (user && user.emailVerified && myNick) {
+                document.getElementById('login-screen').style.display = 'none';
+                db.ref('usuarios/' + myNick).update({ online: true });
+                escucharMisGrupos();
+            } else {
+                // Si en 1.5s no hay respuesta positiva, forzamos el formulario
+                setTimeout(() => {
+                    document.getElementById('auth-status').style.display = 'none';
+                    document.getElementById('login-form').style.display = 'block';
+                }, 1500);
+            }
+        });
+
+        function acceder() {
+            const nickIn = document.getElementById('nick').value.trim();
+            const email = document.getElementById('mail').value.trim();
+            const pass = document.getElementById('pass').value.trim();
+            if(!nickIn || !email || !pass) return alert("Completa los datos");
+
+            auth.signInWithEmailAndPassword(email, pass).then(res => {
+                if(res.user.emailVerified) {
+                    myNick = nickIn;
+                    localStorage.setItem('sler_nick', myNick);
+                    location.reload();
+                } else { alert("Verifica tu email en la bandeja de entrada."); }
+            }).catch(e => {
+                if(e.code === 'auth/user-not-found') {
+                    auth.createUserWithEmailAndPassword(email, pass).then(res => {
+                        res.user.sendEmailVerification();
+                        db.ref('usuarios/' + nickIn).set({ nick: nickIn, email: email, online: false });
+                        alert("¡Cuenta creada! Revisa tu email para activarla.");
+                    });
+                } else { alert("Error: " + e.message); }
+            });
+        }
+
+        function cerrarSesion() {
+            if(myNick) db.ref('usuarios/'+myNick).update({online:false});
+            localStorage.removeItem('sler_nick');
+            auth.signOut().then(() => location.reload());
+        }
+
+        // LÓGICA DE GRUPOS PRIVADOS
+        function crearGrupo() {
+            const nombreG = prompt("Nombre para tu círculo privado:");
+            if(!nombreG) return;
+            db.ref('grupos/' + nombreG).set({
+                admin: myNick,
+                miembros: { [myNick]: true }
+            }).then(() => seleccionarGrupo(nombreG));
+        }
+
+        function escucharMisGrupos() {
+            db.ref('grupos').on('value', snap => {
+                const list = document.getElementById('groups-list');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const g = child.val();
+                    if(g.miembros && g.miembros[myNick]) {
+                        const div = document.createElement('div');
+                        div.className = 'item-box';
+                        div.innerHTML = `<b>${child.key}</b><span>★ Admin: ${g.admin}</span>`;
+                        div.onclick = () => seleccionarGrupo(child.key);
+                        list.appendChild(div);
+                    }
+                });
+            });
+        }
+
+        function seleccionarGrupo(nombreG) {
+            grupoActivo = nombreG;
+            document.getElementById('board-title').innerText = "GRUPO: " + nombreG;
+            db.ref(`grupos/${nombreG}/admin`).once('value', snap => {
+                document.getElementById('btn-invitar').style.display = (snap.val() === myNick) ? 'block' : 'none';
+            });
+            escucharMiembros(nombreG);
+        }
+
+        function escucharMiembros(nombreG) {
+            db.ref(`grupos/${nombreG}/miembros`).on('value', snap => {
+                const list = document.getElementById('users-list');
+                list.innerHTML = "";
+                snap.forEach(child => {
+                    const nickM = child.key;
+                    const div = document.createElement('div');
+                    div.className = 'item-box';
+                    div.innerText = (nickM === myNick) ? nickM + " (Tú)" : nickM;
+                    if(nickM !== myNick) {
+                        div.onclick = () => abrirChat(nickM);
+                        div.oncontextmenu = (e) => { e.preventDefault(); expulsar(nickM); };
+                    }
+                    list.appendChild(div);
+                });
+            });
+        }
+
+        function invitarAlGrupo() {
+            const invit = prompt("Escribe el NICK exacto de la persona a invitar:");
+            if(invit) db.ref(`grupos/${grupoActivo}/miembros/${invit}`).set(true);
+        }
+
+        function expulsar(nickEx) {
+            db.ref(`grupos/${grupoActivo}/admin`).once('value', s => {
+                if(s.val() === myNick && confirm("¿Expulsar a " + nickEx + " del grupo?")) {
+                    db.ref(`grupos/${grupoActivo}/miembros/${nickEx}`).remove();
+                }
+            });
+        }
+
+        // CHAT Y MOTOR SLER
+        function abrirChat(nick) {
+            selectedNick = nick;
+            document.getElementById('popup-title').innerText = "CONVERSANDO CON: " + nick;
+            document.getElementById('chat-popup').style.display = 'flex';
+            const chatId = [myNick, selectedNick].sort().join('_');
+            db.ref('mensajes/'+chatId).off();
+            db.ref('mensajes/'+chatId).on('child_added', snap => {
+                const m = snap.val();
+                const box = document.getElementById('chat-messages');
+                const side = m.emisor === myNick ? "border-left:4px solid #000; background:#f9f9f9;" : "border-right:4px solid #000; text-align:right; background:#fff;";
+                box.innerHTML += `<div style="margin-bottom:12px; padding:8px; ${side}">${ejecutarMotor(m.texto, 25)}</div>`;
+                box.scrollTop = box.scrollHeight;
+            });
+        }
+
+        function enviarPrivado() {
+            const inp = document.getElementById('priv-input');
+            if(!inp.value.trim() || !selectedNick) return;
+            const chatId = [myNick, selectedNick].sort().join('_');
+            db.ref('mensajes/'+chatId).push({emisor:myNick, texto:inp.value.trim(), ts: Date.now()});
+            inp.value = "";
+        }
+
+        function ejecutarMotor(t, l) {
+            let mazo = t.replace(/\s+/g, ' ').trim().split(' ');
+            let res = "", par = false;
+            while (mazo.length > 0) {
+                let lin = "";
+                while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= l) {
+                    lin += (lin ? " " : "") + mazo.shift();
+                }
+                let h = l - lin.length;
+                if (mazo.length > 0 && h >= 3 && mazo[0].length >= 6) {
+                    let p = mazo[0], c = h - 1;
+                    lin += !par ? " " + p.substring(0, c) + "-" : " -" + p.substring(0, c);
+                    mazo[0] = p.substring(c);
+                }
+                if (par) {
+                    let inv = lin.split(' ').reverse().join(' ');
+                    res += `<div style="text-align:right;">${inv}</div>`;
+                } else { res += `<div>${lin}</div>`; }
+                par = !par;
+            }
+            return res;
+        }
+
+        function procesarEscritorio() {
+            const b = document.getElementById('practice-board');
+            const i = document.getElementById('main-input');
+            if(!i.value.trim()) return;
+            b.innerHTML += `<div style="margin-bottom:25px; border-bottom:1px solid #000; padding-bottom: 10px;">${ejecutarMotor(i.value, 60)}</div>`;
+            i.value = ""; b.scrollTop = b.scrollHeight;
+        }
+
+        function irAlTest() {
+            if(!myNick) return alert("Inicia sesión primero");
+            window.location.href = `https://jonatan823.github.io/ChatSler/?authSler=${myNick}`;
+        }
+    </script>
+</body>
+</html>
