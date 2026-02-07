@@ -2,82 +2,63 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CHAT SLER - 2026 (SISTEMA INTEGRADO)</title>
+    <title>CHAT SLER - 2026 (FINAL INTEGRADO)</title>
     <style>
         * { box-sizing: border-box; }
-        body { 
-            font-family: 'Courier New', Courier, monospace; 
-            background: #c0c0c0; margin: 0; height: 100vh; 
-            display: flex; overflow: hidden; 
-        }
-
+        body { font-family: 'Courier New', Courier, monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
+        
         /* LOGIN */
-        #login-screen { 
-            position: fixed; inset: 0; background: #fff; z-index: 9999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
-        }
+        #login-screen { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
         .login-box { width: 450px; text-align: center; }
         .login-box h2 { text-decoration: underline; margin-bottom: 30px; letter-spacing: 2px; }
-        .login-box input { 
-            width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; 
-            font-family: 'Courier New'; text-align: center; font-size: 18px; 
-        }
-
-        /* ESTRUCTURA PRINCIPAL */
+        .login-box input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-size: 18px; }
+        
+        /* ESTRUCTURA */
         #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
         #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-
-        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; text-transform: uppercase; }
         
-        #practice-board { 
-            flex: 1; overflow-y: auto; padding: 40px; background: #fff; 
-            white-space: pre; font-size: 19px; line-height: 1.5;
-        }
-
-        /* ESTILO DE CONTACTOS */
-        .user-item { 
-            padding: 12px; border: 2px solid #000; cursor: pointer; 
-            font-weight: bold; background: #fff; margin: 5px; 
-            text-align: center; text-transform: uppercase; font-size: 12px;
-        }
+        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        #practice-board { flex: 1; overflow-y: auto; padding: 40px; background: #fff; white-space: pre; font-size: 19px; line-height: 1.5; }
+        
+        .user-item { padding: 12px; border: 2px solid #000; cursor: pointer; font-weight: bold; background: #fff; margin: 5px; text-align: center; text-transform: uppercase; font-size: 11px; }
         .user-item:hover { background: #000; color: #fff; }
-
+        
         #input-zone { padding: 15px; border-top: 3px solid #000; background: #ddd; }
         textarea { width: 100%; height: 80px; border: 2px solid #000; font-family: 'Courier New'; font-size: 18px; padding: 10px; resize: none; }
-
-        .nav-btn { 
-            width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; 
-            cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; 
-        }
-        .nav-btn:hover { background: #000; color: #fff; }
+        
+        .nav-btn { width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; }
+        
+        /* VENTANA PRIVADA */
+        #chat-popup { position: fixed; bottom: 20px; right: 230px; width: 380px; height: 500px; background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000; }
+        #chat-popup-messages { flex: 1; overflow-y: auto; padding: 10px; background: #fff; border-bottom: 2px solid #000; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h2><u>CHAT SLER - ACCESO</u></h2>
+            <h2><u>CHAT SLER - 2026</u></h2>
             <input type="text" id="nick" placeholder="NICK">
             <input type="email" id="mail" placeholder="EMAIL">
             <input type="password" id="pass" placeholder="CONTRASEÑA">
-            <button class="nav-btn" style="background: #000; color: #fff; font-size: 16px;" onclick="acceder()">ENTRAR AL SISTEMA</button>
-            <p id="msg-status" style="font-size: 12px; margin-top: 10px; color: #d00;"></p>
+            <button class="nav-btn" style="background: #000; color: #fff;" onclick="acceder()">ENTRAR AL SISTEMA</button>
+            <p id="msg-status" style="font-size: 11px; color: red; margin-top: 10px;"></p>
         </div>
     </div>
 
     <div id="sidebar-left">
-        <div class="practice-header">CONTACTOS ONLINE</div>
+        <div class="practice-header">CONTACTOS</div>
         <div id="users-list" style="flex:1; overflow-y: auto;"></div>
         <button class="nav-btn" style="margin:10px;" onclick="location.reload()">SALIR</button>
     </div>
 
     <div id="main-practice">
-        <div class="practice-header">ESCRITORIO PERSONAL - MOTOR SLER</div>
+        <div class="practice-header">ESCRITORIO DE PRÁCTICA</div>
         <div id="practice-board"></div>
         <div id="input-zone">
-            <textarea id="main-input" placeholder="Escribe aquí para procesar con SLER..."></textarea>
-            <div style="display:flex; gap:10px; margin-top:5px;">
+            <textarea id="main-input" placeholder="Escribe para practicar SLER..."></textarea>
+            <div style="display:flex; gap:5px; margin-top:5px;">
                 <button class="nav-btn" onclick="procesarEscritorio('sler')">VISTA SLER</button>
                 <button class="nav-btn" onclick="procesarEscritorio('normal')">NORMAL</button>
             </div>
@@ -85,10 +66,21 @@
     </div>
 
     <div id="sidebar-right">
-        <div class="practice-header" style="background:none; color:#000; text-align:left; padding-left:0;">ACCIONES:</div>
-        <button class="nav-btn" onclick="alert('Iniciando repositorio de testing...')">TEST REPO</button>
+        <div class="practice-header" style="background:none; color:#000; text-align:left;">ACCIONES:</div>
+        <button class="nav-btn" onclick="window.location.href='https://jonatan823.github.io/ChatSler/'">TEST REPO</button>
         <button class="nav-btn">HOME</button>
-        <button class="nav-btn">AYUDA</button>
+    </div>
+
+    <div id="chat-popup">
+        <div class="practice-header" id="popup-title">CHAT PRIVADO</div>
+        <div id="chat-popup-messages"></div>
+        <div style="padding:10px; background:#eee; display:flex; flex-direction:column; gap:5px;">
+            <input type="text" id="priv-input" placeholder="Escribe..." style="width:100%; padding:10px; border:2px solid #000;">
+            <div style="display:flex; gap:5px;">
+                <button class="nav-btn" style="flex:2; background:#000; color:#fff;" onclick="enviarPrivado()">ENTER</button>
+                <button class="nav-btn" style="flex:1;" onclick="document.getElementById('chat-popup').style.display='none'">CERRAR</button>
+            </div>
+        </div>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -109,72 +101,73 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
         const auth = firebase.auth();
-        let myNick = "", maxM = 60;
+        let myNick = "", selectedNick = "", maxM = 60;
 
         function acceder() {
             myNick = document.getElementById('nick').value.trim();
             const email = document.getElementById('mail').value.trim();
             const password = document.getElementById('pass').value.trim();
-            const status = document.getElementById('msg-status');
+            if(!myNick || !email || !password) return alert("Completa todo");
 
-            if(!myNick || !email || !password) {
-                alert("Completa todos los campos");
-                return;
-            }
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    if(userCredential.user.emailVerified) {
-                        db.ref('usuarios/' + myNick).update({ 
-                            online: true, 
-                            validado: true,
-                            ultimaConexion: firebase.database.ServerValue.TIMESTAMP 
-                        });
-                        document.getElementById('login-screen').style.display = 'none';
-                        cal();
-                        escucharContactos();
-                    } else {
-                        status.innerText = "Email no verificado. Revisa tu correo.";
-                        userCredential.user.sendEmailVerification();
-                    }
-                })
-                .catch((error) => {
-                    if (error.code === 'auth/user-not-found') {
-                        registrarNuevo(email, password, myNick);
-                    } else {
-                        alert("Error: " + error.message);
-                    }
-                });
-        }
-
-        function registrarNuevo(email, password, nick) {
-            auth.createUserWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    userCredential.user.sendEmailVerification();
-                    db.ref('usuarios/' + nick).set({ nick: nick, email: email, validado: false, online: false });
-                    alert("¡Cuenta creada! Verifica tu email para poder entrar.");
-                })
-                .catch(err => alert(err.message));
+            auth.signInWithEmailAndPassword(email, password).then(res => {
+                if(res.user.emailVerified) {
+                    db.ref('usuarios/'+myNick).update({online:true, validado:true});
+                    document.getElementById('login-screen').style.display = 'none';
+                    cal(); escucharContactos();
+                } else { alert("Valida tu email primero."); }
+            }).catch(e => {
+                if(e.code === 'auth/user-not-found') {
+                    auth.createUserWithEmailAndPassword(email, password).then(res => {
+                        res.user.sendEmailVerification();
+                        db.ref('usuarios/'+myNick).set({nick:myNick, email:email, validado:false});
+                        alert("Verifica tu email antes de entrar.");
+                    });
+                } else { alert(e.message); }
+            });
         }
 
         function escucharContactos() {
-            const list = document.getElementById('users-list');
-            db.ref('usuarios').on('value', (snap) => {
-                list.innerHTML = "";
-                snap.forEach((child) => {
+            db.ref('usuarios').on('value', snap => {
+                const list = document.getElementById('users-list'); list.innerHTML = "";
+                snap.forEach(child => {
                     const u = child.val();
                     if(u.nick !== myNick) {
                         const div = document.createElement('div');
-                        div.className = 'user-item';
-                        div.innerText = u.nick + (u.online ? " [ON]" : " [OFF]");
-                        div.onclick = () => alert("Iniciando chat con " + u.nick);
+                        div.className = 'user-item'; div.innerText = u.nick + (u.online ? " [ON]" : " [OFF]");
+                        div.onclick = () => abrirVentanaPrivada(u.nick);
                         list.appendChild(div);
                     }
                 });
             });
         }
 
-        // Lógica de Medición y Escritorio
+        function abrirVentanaPrivada(nick) {
+            selectedNick = nick;
+            document.getElementById('popup-title').innerText = "CHAT CON: " + nick;
+            document.getElementById('chat-popup').style.display = 'flex';
+            document.getElementById('chat-popup-messages').innerHTML = "";
+            const chatId = [myNick, selectedNick].sort().join('_');
+            db.ref('mensajes/'+chatId).off();
+            db.ref('mensajes/'+chatId).on('child_added', snap => renderizarPrivado(snap.val()));
+        }
+
+        function enviarPrivado() {
+            const input = document.getElementById('priv-input');
+            if(input.value.trim() && selectedNick) {
+                const chatId = [myNick, selectedNick].sort().join('_');
+                db.ref('mensajes/'+chatId).push({emisor:myNick, texto:input.value.trim()});
+                input.value = "";
+            }
+        }
+
+        function renderizarPrivado(msg) {
+            const container = document.getElementById('chat-popup-messages');
+            const esMio = msg.emisor === myNick;
+            const style = esMio ? "border-left:3px solid #000; background:#f0f0f0;" : "border-right:3px solid #000; background:#fff;";
+            container.innerHTML += `<div style="margin-bottom:10px; padding:5px; ${style}">${ejecutarMotor(msg.texto, 28)}</div>`;
+            container.scrollTop = container.scrollHeight;
+        }
+
         function cal() {
             const board = document.getElementById('practice-board');
             const span = document.createElement('span');
@@ -189,12 +182,11 @@
             const board = document.getElementById('practice-board');
             const txt = document.getElementById('main-input').value.trim();
             if(!txt) return;
-            board.innerHTML += `<div style="margin-bottom:20px;">${modo === 'normal' ? txt : ejecutarMotor(txt, maxM)}</div>`;
+            board.innerHTML += `<div style="margin-bottom:20px;">${modo==='normal' ? txt : ejecutarMotor(txt, maxM)}</div>`;
             document.getElementById('main-input').value = "";
             board.scrollTop = board.scrollHeight;
         }
 
-        // MOTOR SLER ORIGINAL
         function ejecutarMotor(texto, limite) {
             let mazo = texto.replace(/\s+/g, ' ').trim().split(' ');
             let res = "", par = false;
@@ -203,7 +195,6 @@
                 while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= limite) {
                     lin += (lin ? " " : "") + mazo.shift();
                 }
-                
                 let h = limite - lin.length;
                 if (mazo.length > 0 && h >= 3 && mazo[0].length >= 6) {
                     let p = mazo[0], corte = h - 1;
@@ -211,14 +202,10 @@
                     else lin += (lin ? " " : "") + "-" + p.substring(0, corte);
                     mazo[0] = p.substring(corte);
                 }
-
                 if (par) {
                     let inv = lin.split(' ').reverse().join(' ');
-                    let pad = " ".repeat(Math.max(0, limite - inv.length));
-                    res += `<div>${pad}${inv}</div>`;
-                } else {
-                    res += `<div>${lin}</div>`;
-                }
+                    res += `<div>${" ".repeat(Math.max(0, limite-inv.length))}${inv}</div>`;
+                } else { res += `<div>${lin}</div>`; }
                 par = !par;
             }
             return res;
