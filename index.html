@@ -3,208 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLER 2026 - SISTEMA INTEGRAL</title>
+    <title>SLER 2026 - SISTEMA DE GRUPOS PRIVADOS</title>
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Courier New', Courier, monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
 
-        /* RESPONSIVE & LAYOUT */
-        #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; transition: 0.3s; }
-        #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 300px; }
-        #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        /* PANTALLA DE ACCESO */
+        #login-screen { position: fixed; inset: 0; background: #c0c0c0; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
+        .login-box { width: 90%; max-width: 400px; text-align: center; background: #fff; padding: 20px; border: 3px solid #000; }
+        .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; }
+
+        /* ESTRUCTURA PRINCIPAL */
+        #sidebar-left { width: 240px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
+        #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 320px; }
+        #sidebar-right { width: 220px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
 
         @media (max-width: 768px) {
             body { flex-direction: column; overflow-y: auto; }
             #sidebar-left, #sidebar-right { width: 100%; height: auto; border: none; border-bottom: 3px solid #000; }
-            #main-practice { width: 100%; height: 60vh; }
+            #main-practice { height: 60vh; }
         }
 
-        /* LOGIN OVERLAY */
-        #login-screen { position: fixed; inset: 0; background: #c0c0c0; z-index: 9999; display: none; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
-        .login-box { width: 90%; max-width: 400px; text-align: center; background: #fff; padding: 20px; border: 3px solid #000; }
-        .login-box input { width: 100%; padding: 12px; margin-bottom: 10px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; }
+        /* CABECERAS Y BOTONES */
+        .header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+        .nav-btn { width: 100%; padding: 10px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; text-transform: uppercase; font-size: 11px; margin-bottom: 5px; }
+        .nav-btn:hover { background: #000; color: #fff; }
 
-        /* COMPONENTES */
-        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; }
-        #practice-board { flex: 1; overflow-y: auto; padding: 20px; background: #fff; white-space: pre-wrap; font-size: 16px; line-height: 1.4; }
-        .user-item { padding: 10px; border: 2px solid #000; cursor: pointer; font-weight: bold; background: #fff; margin: 5px; text-align: center; font-size: 11px; }
-        .nav-btn { width: 100%; padding: 10px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+        /* LISTAS Y CHAT */
+        #users-list, #groups-list { flex: 1; overflow-y: auto; padding: 5px; }
+        .item-box { padding: 10px; border: 2px solid #000; background: #fff; margin-bottom: 5px; cursor: pointer; font-size: 11px; position: relative; }
+        .item-box span { font-size: 9px; color: #666; display: block; }
+        
+        #practice-board { flex: 1; overflow-y: auto; padding: 20px; white-space: pre-wrap; font-size: 16px; }
         
         /* CHAT POPUP */
-        #chat-popup { position: fixed; bottom: 10px; right: 10px; width: 320px; height: 400px; background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000; max-width: 95vw; }
-        #chat-popup-messages { flex: 1; overflow-y: auto; padding: 10px; background: #fff; font-size: 13px; }
+        #chat-popup { position: fixed; bottom: 10px; right: 10px; width: 320px; height: 400px; background: #fff; border: 4px solid #000; display: none; flex-direction: column; z-index: 1000; }
+        #chat-messages { flex: 1; overflow-y: auto; padding: 10px; font-size: 13px; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
         <div class="login-box">
-            <h2><u>CHAT SLER</u></h2>
-            <input type="text" id="nick" placeholder="NICK">
-            <input type="email" id="mail" placeholder="EMAIL">
-            <input type="password" id="pass" placeholder="CONTRASEÑA">
-            <button class="nav-btn" style="background: #000; color: #fff;" onclick="acceder()">ENTRAR</button>
-            <p id="msg-status" style="font-size: 11px; color: red; margin-top: 10px;"></p>
+            <h2><u>CHAT SLER 2026</u></h2>
+            <div id="auth-status">Comprobando llave...</div>
+            <div id="login-form" style="display:none;">
+                <input type="text" id="nick" placeholder="NICK">
+                <input type="email" id="mail" placeholder="EMAIL">
+                <input type="password" id="pass" placeholder="PASSWORD">
+                <button class="nav-btn" style="background:#000; color:#fff;" onclick="acceder()">ENTRAR / REGISTRAR</button>
+            </div>
         </div>
     </div>
 
     <div id="sidebar-left">
-        <div class="practice-header">CONTACTOS</div>
-        <div id="users-list" style="flex:1; overflow-y: auto;"></div>
-        <button class="nav-btn" onclick="cerrarSesion()">LOGOUT</button>
+        <div class="header">MIS GRUPOS</div>
+        <div id="groups-list"></div>
+        <button class="nav-btn" onclick="crearGrupo()">+ CREAR GRUPO</button>
+        <div class="header">MIEMBROS</div>
+        <div id="users-list"></div>
+        <button class="nav-btn" onclick="cerrarSesion()">CERRAR SESIÓN</button>
     </div>
 
     <div id="main-practice">
-        <div class="practice-header">ESCRITORIO SLER</div>
+        <div class="header" id="board-title">ESCRITORIO PERSONAL</div>
         <div id="practice-board"></div>
-        <div style="padding: 10px; background: #ddd; border-top: 3px solid #000;">
-            <textarea id="main-input" style="width:100%; height:60px; border:2px solid #000; font-family:'Courier New'; padding:5px; resize:none;"></textarea>
-            <button class="nav-btn" style="margin-top:5px;" onclick="procesarEscritorio('sler')">PROCESAR SLER</button>
-        </div>
-    </div>
-
-    <div id="sidebar-right">
-        <div class="practice-header" style="background:none; color:#000;">MENU:</div>
-        <button class="nav-btn" onclick="window.location.href='https://jonatan823.github.io/ChatSler/'">TEST REPO</button>
-    </div>
-
-    <div id="chat-popup">
-        <div class="practice-header" id="popup-title">CHAT</div>
-        <div id="chat-popup-messages"></div>
-        <div style="padding:5px; border-top:2px solid #000;">
-            <input type="text" id="priv-input" placeholder="Escribe..." style="width:100%; padding:8px; border:2px solid #000;" onkeydown="if(event.key==='Enter') enviarPrivado()">
-            <button class="nav-btn" onclick="enviarPrivado()" style="margin-top:2px;">ENVIAR</button>
-            <button class="nav-btn" onclick="document.getElementById('chat-popup').style.display='none'" style="margin-top:2px;">X</button>
-        </div>
-    </div>
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-    <script>
-        var firebaseConfig = {
-            apiKey: "AIzaSyD5ItA76Xc7mmihQPC2AUCHQFStii4NAUg",
-            authDomain: "sler-chat-lab.firebaseapp.com",
-            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
-            projectId: "sler-chat-lab",
-            storageBucket: "sler-chat-lab.firebasestorage.app",
-            messagingSenderId: "594954603335",
-            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const auth = firebase.auth();
-        let myNick = localStorage.getItem('sler_nick') || "", selectedNick = "";
-
-        auth.onAuthStateChanged((user) => {
-            if (user && user.emailVerified && myNick) {
-                document.getElementById('login-screen').style.display = 'none';
-                db.ref('usuarios/'+myNick).update({online:true});
-                escucharContactos();
-            } else {
-                document.getElementById('login-screen').style.display = 'flex';
-            }
-        });
-
-        function acceder() {
-            const nickInput = document.getElementById('nick').value.trim();
-            const email = document.getElementById('mail').value.trim();
-            const password = document.getElementById('pass').value.trim();
-            if(!nickInput || !email || !password) return;
-
-            auth.signInWithEmailAndPassword(email, password).then(res => {
-                if(res.user.emailVerified) {
-                    myNick = nickInput;
-                    localStorage.setItem('sler_nick', myNick);
-                    location.reload();
-                } else { alert("Verifica tu email."); }
-            }).catch(e => {
-                if(e.code === 'auth/user-not-found') {
-                    auth.createUserWithEmailAndPassword(email, password).then(res => {
-                        res.user.sendEmailVerification();
-                        db.ref('usuarios/'+nickInput).set({nick:nickInput, email:email});
-                        alert("Cuenta creada. Verifica tu mail.");
-                    });
-                } else { alert(e.message); }
-            });
-        }
-
-        function cerrarSesion() {
-            localStorage.removeItem('sler_nick');
-            if(myNick) db.ref('usuarios/'+myNick).update({online:false});
-            auth.signOut().then(() => location.reload());
-        }
-
-        function escucharContactos() {
-            db.ref('usuarios').on('value', snap => {
-                const list = document.getElementById('users-list'); list.innerHTML = "";
-                snap.forEach(child => {
-                    const u = child.val();
-                    if(u.nick !== myNick) {
-                        const div = document.createElement('div');
-                        div.className = 'user-item'; div.innerText = u.nick + (u.online ? " [ON]" : " [OFF]");
-                        div.onclick = () => abrirVentanaPrivada(u.nick);
-                        list.appendChild(div);
-                    }
-                });
-            });
-        }
-
-        function abrirVentanaPrivada(nick) {
-            selectedNick = nick;
-            document.getElementById('popup-title').innerText = "CON: " + nick;
-            document.getElementById('chat-popup').style.display = 'flex';
-            const chatId = [myNick, selectedNick].sort().join('_');
-            db.ref('mensajes/'+chatId).off();
-            db.ref('mensajes/'+chatId).on('child_added', snap => {
-                const msg = snap.val();
-                const container = document.getElementById('chat-popup-messages');
-                const style = msg.emisor === myNick ? "border-left:3px solid #000; padding:5px; margin-bottom:10px;" : "border-right:3px solid #000; padding:5px; margin-bottom:10px; text-align:right;";
-                container.innerHTML += `<div style="${style}">${ejecutarMotor(msg.texto, 25)}</div>`;
-                container.scrollTop = container.scrollHeight;
-            });
-        }
-
-        function enviarPrivado() {
-            const input = document.getElementById('priv-input');
-            if(!input.value.trim()) return;
-            const chatId = [myNick, selectedNick].sort().join('_');
-            db.ref('mensajes/'+chatId).push({emisor:myNick, texto:input.value.trim()});
-            input.value = "";
-        }
-
-        function ejecutarMotor(texto, limite) {
-            let mazo = texto.replace(/\s+/g, ' ').trim().split(' ');
-            let res = "", par = false;
-            while (mazo.length > 0) {
-                let lin = "";
-                while (mazo.length > 0 && (lin.length + mazo[0].length + (lin ? 1 : 0)) <= limite) {
-                    lin += (lin ? " " : "") + mazo.shift();
-                }
-                let h = limite - lin.length;
-                if (mazo.length > 0 && h >= 3 && mazo[0].length >= 6) {
-                    let p = mazo[0], corte = h - 1;
-                    lin += !par ? " " + p.substring(0, corte) + "-" : " -" + p.substring(0, corte);
-                    mazo[0] = p.substring(corte);
-                }
-                if (par) {
-                    let inv = lin.split(' ').reverse().join(' ');
-                    res += `<div style="text-align:right;">${inv}</div>`;
-                } else { res += `<div>${lin}</div>`; }
-                par = !par;
-            }
-            return res;
-        }
-
-        function procesarEscritorio(modo) {
-            const board = document.getElementById('practice-board');
-            const txt = document.getElementById('main-input').value.trim();
-            if(!txt) return;
-            board.innerHTML += `<div style="margin-bottom:15px; border-bottom:1px solid #000;">${ejecutarMotor(txt, 60)}</div>`;
-            document.getElementById('main-input').value = "";
-            board.scrollTop = board.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+        <div style="padding:10px; background:#ddd; border-top:3px solid #0
