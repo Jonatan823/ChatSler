@@ -2,38 +2,78 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>CHAT SLER - 2026 (VALIDACIÓN)</title>
+    <title>CHAT SLER - 2026</title>
     <style>
+        /* Mantenemos tu estilo original */
         * { box-sizing: border-box; }
-        body { 
-            font-family: 'Courier New', Courier, monospace; 
-            background: #c0c0c0; margin: 0; height: 100vh; 
-            display: flex; overflow: hidden; 
-        }
-
-        /* LOGIN */
-        #login-screen { 
-            position: fixed; inset: 0; background: #fff; z-index: 9999; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; 
-        }
+        body { font-family: 'Courier New', Courier, monospace; background: #c0c0c0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
+        #login-screen { position: fixed; inset: 0; background: #fff; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 5px solid #000; }
         .login-box { width: 450px; text-align: center; }
-        .login-box h2 { text-decoration: underline; margin-bottom: 30px; letter-spacing: 2px; }
-        .login-box input { 
-            width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; 
-            font-family: 'Courier New'; text-align: center; font-size: 18px; 
-        }
-
-        /* ESTRUCTURA */
-        #sidebar-left { width: 220px; border-right: 3px solid #000; background: #eee; display: flex; flex-direction: column; }
+        .login-box input { width: 100%; padding: 15px; margin-bottom: 12px; border: 2px solid #000; font-family: 'Courier New'; text-align: center; font-size: 18px; }
+        .nav-btn { width: 100%; padding: 15px 5px; background: #fff; border: 2px solid #000; cursor: pointer; font-family: 'Courier New'; font-weight: bold; font-size: 13px; text-transform: uppercase; }
         #main-practice { flex: 1; background: #fff; display: flex; flex-direction: column; min-width: 600px; }
-        #sidebar-right { width: 200px; border-left: 3px solid #000; background: #f4f4f4; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
 
-        .practice-header { background: #000; color: #fff; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+    <div id="login-screen">
+        <div class="login-box">
+            <h2><u>CHAT SLER</u></h2>
+            <input type="text" id="nick" placeholder="NICK">
+            <input type="email" id="mail" placeholder="EMAIL">
+            <input type="password" id="pass" placeholder="CONTRASEÑA">
+            <button class="nav-btn" style="background: #000; color: #fff;" onclick="acceder()">ENTRAR AL SISTEMA</button>
+        </div>
+    </div>
+
+    <div id="main-practice">
+        <div class="practice-header">ESCRITORIO PERSONAL</div>
+        <div id="practice-board" style="flex:1; padding:20px; overflow-y:auto;"></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Configuración verificada según tus capturas
+        var firebaseConfig = {
+            apiKey: "AIzaSyD5ItA76Xc7mmihQPC2AUCHQFStii4NAUg", 
+            authDomain: "sler-chat-lab.firebaseapp.com",
+            databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
+            projectId: "sler-chat-lab",
+            storageBucket: "sler-chat-lab.firebasestorage.app",
+            messagingSenderId: "594954603335",
+            appId: "1:594954603335:web:d332aa211e8ecce5521a62"
+        };
         
-        #practice-board { 
-            flex: 1; overflow-y: auto; padding: 40px; background: #fff; 
-            white-space: pre; font-size: 19px; line-height: 1.5;
-        }
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
 
-        .sler-line { color: #000; width: 100%; display: block; }
-        .sler-privado-line { font-size: 15px; width
+        function acceder() {
+            const nick = document.getElementById('nick').value.trim();
+            const email = document.getElementById('mail').value.trim();
+            const password = document.getElementById('pass').value.trim();
+
+            if(nick && email && password) {
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        userCredential.user.sendEmailVerification();
+                        db.ref('usuarios/' + nick).set({
+                            nick: nick,
+                            email: email,
+                            validado: false
+                        });
+                        document.getElementById('login-screen').style.display = 'none';
+                        alert("¡Enviamos un mail de validación!");
+                    })
+                    .catch((error) => alert("Error: " + error.message));
+            } else {
+                alert("Completa todos los campos");
+            }
+        }
+    </script>
+</body>
+</html>
