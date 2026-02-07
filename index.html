@@ -1,52 +1,68 @@
-<div id="quick-access-sler" style="position:fixed; inset:0; background:#c0c0c0; z-index:10000; display:flex; align-items:center; justify-content:center; font-family:'Courier New';">
-    <div style="background:#fff; padding:30px; border:5px solid #000; text-align:center; max-width:400px;">
-        <h2 style="text-decoration:underline;">ENTRENAMIENTO SLER</h2>
-        <p>Introduce un Nick para comenzar el análisis:</p>
-        <input type="text" id="quick-nick" placeholder="TU NICK" style="width:100%; padding:10px; border:2px solid #000; text-align:center; margin-bottom:10px;">
-        <button onclick="registroRapidoTest()" style="width:100%; padding:15px; background:#000; color:#fff; border:none; cursor:pointer; font-weight:bold;">COMENZAR TEST</button>
-        <p id="status-test" style="font-size:11px; margin-top:10px;"></p>
-    </div>
-</div>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-// Configuración de Firebase (usa la misma que en el Chat)
-const firebaseConfig = { /* Tu Configuración */ };
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-const auth = firebase.auth();
+    // Configuración Nodo Central SLER
+    const firebaseConfig = {
+        apiKey: "AIzaSyD5ItA76Xc7mmihQPC2AUCHQFStii4NAUg",
+        authDomain: "sler-chat-lab.firebaseapp.com",
+        databaseURL: "https://sler-chat-lab-default-rtdb.firebaseio.com",
+        projectId: "sler-chat-lab",
+        storageBucket: "sler-chat-lab.firebasestorage.app",
+        messagingSenderId: "594954603335",
+        appId: "1:594954603335:web:d332aa211e8ecce5521a62"
+    };
 
-function registroRapidoTest() {
-    const nick = document.getElementById('quick-nick').value.trim();
-    const status = document.getElementById('status-test');
-    
-    if(!nick) return alert("Escribe un Nick");
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const auth = firebase.auth();
 
-    status.innerText = "Sincronizando con Nodo Central...";
+    let urlDestino = ""; // Almacena a dónde quería ir el usuario
 
-    // 1. Entramos como anónimo para tener UID de Firebase
-    auth.signInAnonymously().then(res => {
-        // 2. Registramos el Nick en la base de datos de usuarios
-        db.ref('usuarios/' + nick).set({
-            nick: nick,
-            origen: "test_directo",
-            online: true,
-            uid: res.user.uid,
-            fecha_registro: firebase.database.ServerValue.TIMESTAMP
-        }).then(() => {
-            // 3. Guardamos en el navegador para que el chat lo reconozca después
-            localStorage.setItem('sler_nick', nick);
-            // 4. Liberamos el test
-            document.getElementById('quick-access-sler').style.display = 'none';
-            console.log("Cliente capturado: " + nick);
+    // 1. FUNCIÓN PARA TUS BOTONES (Chat y Test)
+    // Debes poner onclick="solicitarAcceso('URL')" en tus botones de la web oficial
+    function solicitarAcceso(url) {
+        const nickGuardado = localStorage.getItem('sler_nick');
+        if (nickGuardado) {
+            // Si ya existe, pasa directo con la llave en la URL
+            window.location.href = url + "?authSler=" + nickGuardado;
+        } else {
+            // Si no existe, abrimos la aduana
+            urlDestino = url;
+            document.getElementById('sler-gate').style.display = 'flex';
+        }
+    }
+
+    // 2. ACCIÓN DEL BOTÓN VALIDAR
+    document.getElementById('btn-acceso-sler').onclick = function() {
+        const nick = document.getElementById('gate-nick').value.trim();
+        const status = document.getElementById('gate-status');
+
+        if(!nick || nick.length < 3) {
+            return alert("Por favor, ingresa un Nick válido (mínimo 3 caracteres).");
+        }
+
+        status.innerText = "Sincronizando con Bell Ville...";
+        this.disabled = true;
+
+        // Registro anónimo para crear el cliente en Firebase
+        auth.signInAnonymously().then(res => {
+            db.ref('usuarios/' + nick).set({
+                nick: nick,
+                origen: "sler_oficial_workstation",
+                fecha_registro: firebase.database.ServerValue.TIMESTAMP,
+                online: true
+            }).then(() => {
+                // Guardamos localmente para la triangulación
+                localStorage.setItem('sler_nick', nick);
+                // Redirigimos al destino original con la llave
+                window.location.href = urlDestino + "?authSler=" + nick;
+            });
+        }).catch(e => {
+            status.innerText = "Error de conexión.";
+            this.disabled = false;
+            console.error(e);
         });
-    }).catch(e => {
-        status.innerText = "Error de conexión. Intenta de nuevo.";
-        console.error(e);
-    });
-}
-
-// Si ya tiene el Nick guardado de antes, saltamos el paso
-if(localStorage.getItem('sler_nick')) {
-    document.getElementById('quick-access-sler').style.display = 'none';
-}
+    };
 </script>
